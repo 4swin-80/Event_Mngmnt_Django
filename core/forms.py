@@ -1,5 +1,22 @@
 from django.contrib.auth.forms import AuthenticationForm
 from django import forms
+from .models import Event, Cue
+
+
+class CueForm(forms.ModelForm):
+    class Meta:
+        model = Cue
+        fields = [
+            'event',
+            'operator',
+            'cue_time',
+            'cue_action',
+            'cue_type',
+            'pre_alert_sec'
+        ]
+        widgets = {
+            'cue_time': forms.TimeInput(attrs={'type': 'time'})
+        }
 
 
 class LoginForm(AuthenticationForm):
@@ -12,3 +29,11 @@ class LoginForm(AuthenticationForm):
         'class': 'form-control',
         'placeholder': 'Password'
     }))
+
+class EventForm(forms.ModelForm):
+    class Meta:
+        model = Event
+        fields = ['name', 'date', 'location', 'event_status']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'})
+        }

@@ -1,7 +1,107 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from .forms import LoginForm
+from .forms import LoginForm, EventForm, CueForm
+from .models import Event, Cue
+from django.db.models import Count
+
+
+@login_required
+def performance_dashboard(request):
+    if request.user.role != "admin":
+        return redirect("login")
+
+    data = (
+        Cue.objects
+        .values("operator__username")
+        .annotate(total_tasks=Count("id"))
+    )
+
+    return render(request, "performance.html", {"data": data})
+
+
+@login_required
+def cue_create(request):
+    if request.user.role != "admin":
+        return redirect("login")
+
+    if request.method == "POST":
+        form = CueForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("event_list")
+    else:
+        form = CueForm()
+
+    return render(request, "cue_form.html", {"form": form})
+
+
+# =========================
+# EVENT LIST
+# =========================
+@login_required
+def event_list(request):
+    if request.user.role != "admin":
+        return redirect("login")
+
+    events = Event.objects.filter(admin=request.user)
+    return render(request, "event_list.html", {"events": events})
+
+
+# =========================
+# CREATE EVENT
+# =========================
+@login_required
+def event_create(request):
+    if request.user.role != "admin":
+        return redirect("login")
+
+    if request.method == "POST":
+        form = EventForm(request.POST)
+        if form.is_valid():
+            event = form.save(commit=False)
+            event.admin = request.user
+            event.save()
+            return redirect("event_list")
+    else:
+        form = EventForm()
+
+    return render(request, "event_form.html", {"form": form})
+
+
+# =========================
+# UPDATE EVENT
+# =========================
+@login_required
+def event_update(request, pk):
+    event = Event.objects.get(id=pk)
+
+    if request.user.role != "admin":
+        return redirect("login")
+
+    if request.method == "POST":
+        form = EventForm(request.POST, instance=event)
+        if form.is_valid():
+            form.save()
+            return redirect("event_list")
+    else:
+        form = EventForm(instance=event)
+
+    return render(request, "event_form.html", {"form": form})
+
+
+# =========================
+# DELETE EVENT
+# =========================
+@login_required
+def event_delete(request, pk):
+    event = Event.objects.get(id=pk)
+
+    if request.user.role != "admin":
+        return redirect("login")
+
+    event.delete()
+    return redirect("event_list")
 
 
 def login_view(request):
