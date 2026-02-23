@@ -1,0 +1,75 @@
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from .models import User, Event, Script, Cue, Attendance, Notification
+
+
+# =========================
+# Custom User Admin
+# =========================
+class CustomUserAdmin(UserAdmin):
+    model = User
+
+    fieldsets = UserAdmin.fieldsets + (
+        ("Additional Info", {
+            "fields": ("role", "phone", "operator_role", "status"),
+        }),
+    )
+
+    list_display = (
+        "username",
+        "email",
+        "role",
+        "status",
+        "is_staff",
+    )
+
+    list_filter = ("role", "status")
+
+
+admin.site.register(User, CustomUserAdmin)
+
+
+# =========================
+# Event Admin
+# =========================
+@admin.register(Event)
+class EventAdmin(admin.ModelAdmin):
+    list_display = ("name", "date", "location", "event_status")
+    list_filter = ("event_status", "date")
+    search_fields = ("name", "location")
+
+
+# =========================
+# Script Admin
+# =========================
+@admin.register(Script)
+class ScriptAdmin(admin.ModelAdmin):
+    list_display = ("script_name", "event", "script_type")
+
+
+# =========================
+# Cue Admin
+# =========================
+@admin.register(Cue)
+class CueAdmin(admin.ModelAdmin):
+    list_display = ("cue_action", "event", "operator", "cue_time", "cue_status")
+    list_filter = ("cue_status", "cue_type")
+    search_fields = ("cue_action",)
+
+
+# =========================
+# Attendance Admin
+# =========================
+@admin.register(Attendance)
+class AttendanceAdmin(admin.ModelAdmin):
+    list_display = ("operator", "event", "status", "check_in_time", "check_out_time")
+    list_filter = ("status",)
+
+
+# =========================
+# Notification Admin
+# =========================
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ("cue", "alert_time", "alert_status")
+    list_filter = ("alert_status",)
