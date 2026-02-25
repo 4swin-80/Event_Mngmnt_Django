@@ -1,34 +1,63 @@
-<h2>Operator Live Dashboard</h2>
-<a href="{% url 'logout' %}">Logout</a>
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<h2>Operator Dashboard</h2>
+
+<h3>Pending Cues</h3>
+
+{% for cue in cues %}
+    <div>
+        <strong>{{ cue.cue_action }}</strong>
+        ({{ cue.cue_time }})
+    </div>
+{% empty %}
+    <p>No pending cues.</p>
+{% endfor %}
 
 <div id="alerts"></div>
 
-<audio id="alertSound" src="https://www.soundjay.com/buttons/sounds/beep-01a.mp3"></audio>
+<audio id="alertSound" preload="auto">
+    <source src="{% static 'audio/smooth_notification.mp3' %}" type="audio/mpeg">
+</audio>
 
 <script>
     const socket = new WebSocket(
         'ws://' + window.location.host + '/ws/alerts/'
     );
-
+    
+    // 🔓 Unlock audio after first user interaction
+    document.body.addEventListener('click', function() {
+        const sound = document.getElementById("alertSound");
+        sound.play().then(() => {
+            sound.pause();
+            sound.currentTime = 0;
+        }).catch(() => {});
+    }, { once: true });
+    
     socket.onmessage = function(e) {
         const data = JSON.parse(e.data);
-
+    
         const alertDiv = document.createElement("div");
         alertDiv.innerHTML = data.message;
         alertDiv.style.color = "red";
         alertDiv.style.fontSize = "24px";
         alertDiv.style.animation = "blink 1s infinite";
-
+    
         document.getElementById("alerts").appendChild(alertDiv);
-
-        document.getElementById("alertSound").play();
+    
+        const sound = document.getElementById("alertSound");
+        sound.currentTime = 0;
+        sound.play();
     };
-</script>
+    </script>
 
 <style>
 @keyframes blink {
-    0% { opacity: 1; }
-    50% { opacity: 0; }
-    100% { opacity: 1; }
+    0% {opacity:1;}
+    50% {opacity:0;}
+    100% {opacity:1;}
 }
 </style>
+
+{% endblock %}

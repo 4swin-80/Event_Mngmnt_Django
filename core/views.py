@@ -1,43 +1,81 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from .forms import LoginForm, EventForm, CueForm
-from .models import Event, Cue
+from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Count
+from django.utils import timezone
 
-
-@login_required
-def performance_dashboard(request):
-    if request.user.role != "admin":
-        return redirect("login")
-
-    data = (
-        Cue.objects
-        .values("operator__username")
-        .annotate(total_tasks=Count("id"))
-    )
-
-    return render(request, "performance.html", {"data": data})
-
-
-@login_required
-def cue_create(request):
-    if request.user.role != "admin":
-        return redirect("login")
-
-    if request.method == "POST":
-        form = CueForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("event_list")
-    else:
-        form = CueForm()
-
-    return render(request, "cue_form.html", {"form": form})
+from .models import Event, Cue, Notification, Attendance
+from .forms import EventForm, CueForm
 
 
 # =========================
-# EVENT LIST
+# LOGIN
+# =========================
+def login_view(request):
+    if request.user.is_authenticated:
+        if request.user.role == "admin":
+            return redirect("admin_dashboard")
+        else:
+            return redirect("operator_dashboard")
+
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+
+            if user.role == "admin":
+                return redirect("admin_dashboard")
+            else:
+                return redirect("operator_dashboard")
+    else:
+        form = AuthenticationForm()
+
+    return render(request, "login.html", {"form": form})
+
+
+def logout_view(request):
+    logout(request)
+    return redirect("login")
+
+
+# =========================
+# ADMIN DASHBOARD
+# =========================
+@login_required
+def admin_dashboard(request):
+    if request.user.role != "admin":
+        return redirect("login")
+
+    total_events = Event.objects.filter(admin=request.user).count()
+    total_cues = Cue.objects.count()
+    total_operators = Attendance.objects.values("operator").distinct().count()
+
+    return render(request, "admin_dashboard.html", {
+        "total_events": total_events,
+        "total_cues": total_cues,
+        "total_operators": total_operators,
+    })
+
+
+# =========================
+# OPERATOR DASHBOARD
+# =========================
+@login_required
+def operator_dashboard(request):
+    if request.user.role != "operator":
+        return redirect("login")
+
+    cues = Cue.objects.filter(operator=request.user, cue_status="Pending")
+
+    return render(request, "operator_dashboard.html", {
+        "cues": cues
+    })
+
+
+# =========================
+# EVENT CRUD
 # =========================
 @login_required
 def event_list(request):
@@ -48,9 +86,6 @@ def event_list(request):
     return render(request, "event_list.html", {"events": events})
 
 
-# =========================
-# CREATE EVENT
-# =========================
 @login_required
 def event_create(request):
     if request.user.role != "admin":
@@ -69,12 +104,9 @@ def event_create(request):
     return render(request, "event_form.html", {"form": form})
 
 
-# =========================
-# UPDATE EVENT
-# =========================
 @login_required
 def event_update(request, pk):
-    event = Event.objects.get(id=pk)
+    event = get_object_or_404(Event, id=pk)
 
     if request.user.role != "admin":
         return redirect("login")
@@ -90,12 +122,9 @@ def event_update(request, pk):
     return render(request, "event_form.html", {"form": form})
 
 
-# =========================
-# DELETE EVENT
-# =========================
 @login_required
 def event_delete(request, pk):
-    event = Event.objects.get(id=pk)
+    event = get_object_or_404(Event, id=pk)
 
     if request.user.role != "admin":
         return redirect("login")
@@ -104,40 +133,64 @@ def event_delete(request, pk):
     return redirect("event_list")
 
 
-def login_view(request):
-    if request.user.is_authenticated:
-        return redirect_dashboard(request.user)
+# =========================
+# CUE
+# =========================
+@login_required
+def cue_list(request):
+    if request.user.role != "admin":
+        return redirect("login")
+
+    cues = Cue.objects.all()
+    return render(request, "cue_list.html", {"cues": cues})
+
+
+@login_required
+def cue_create(request):
+    if request.user.role != "admin":
+        return redirect("login")
 
     if request.method == "POST":
-        form = LoginForm(request, data=request.POST)
+        form = CueForm(request.POST)
         if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect_dashboard(user)
+            form.save()
+            return redirect("cue_list")
     else:
-        form = LoginForm()
+        form = CueForm()
 
-    return render(request, "login.html", {"form": form})
-
-
-def logout_view(request):
-    logout(request)
-    return redirect("login")
+    return render(request, "cue_form.html", {"form": form})
 
 
-def redirect_dashboard(user):
-    if user.role == "admin":
-        return redirect("admin_dashboard")
-    elif user.role == "operator":
-        return redirect("operator_dashboard")
-    return redirect("login")
-
-
+# =========================
+# NOTIFICATIONS
+# =========================
 @login_required
-def admin_dashboard(request):
-    return render(request, "admin_dashboard.html")
+def notification_list(request):
+    notifications = Notification.objects.all().order_by("-id")
+    return render(request, "notification_list.html", {"notifications": notifications})
 
 
+# =========================
+# ATTENDANCE
+# =========================
 @login_required
-def operator_dashboard(request):
-    return render(request, "operator_dashboard.html")
+def attendance_view(request):
+    attendance = Attendance.objects.all()
+    return render(request, "attendance.html", {"attendance": attendance})
+
+
+# =========================
+# PERFORMANCE
+# =========================
+@login_required
+def performance_dashboard(request):
+    if request.user.role != "admin":
+        return redirect("login")
+
+    data = (
+        Cue.objects
+        .values("operator__username")
+        .annotate(total_tasks=Count("id"))
+    )
+
+    return render(request, "performance.html", {"data": data})

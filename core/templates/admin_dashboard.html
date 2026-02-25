@@ -1,2 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+
 <h2>Admin Dashboard</h2>
-<a href="{% url 'logout' %}">Logout</a>
+
+<p>Total Events: {{ total_events }}</p>
+<p>Total Cues: {{ total_cues }}</p>
+<p>Total Operators Active: {{ total_operators }}</p>
+
+{% endblock %}

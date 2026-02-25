@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Attendance</h2>
+
+{% for a in attendance %}
+    <div>
+        {{ a.operator.username }} |
+        {{ a.event.name }} |
+        {{ a.status }} |
+        {{ a.check_in_time }}
+    </div>
+{% endfor %}
+
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Notifications</h2>
+
+{% for n in notifications %}
+    <div>
+        <strong>{{ n.cue.cue_action }}</strong> |
+        Alert Time: {{ n.alert_time }} |
+        Status: {{ n.alert_status }}
+    </div>
+    <hr>
+{% empty %}
+    <p>No notifications available.</p>
+{% endfor %}
+
+{% endblock %}

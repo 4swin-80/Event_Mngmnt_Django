@@ -1,8 +1,13 @@
-<h2>Operator Performance</h2>
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Performance Analytics</h2>
 
 {% for item in data %}
-    <p>
+    <div>
         {{ item.operator__username }} :
         {{ item.total_tasks }} Tasks
-    </p>
+    </div>
 {% endfor %}
+
+{% endblock %}
