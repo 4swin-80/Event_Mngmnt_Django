@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Event, Script, Cue, Attendance, Notification, Booking
+from .models import User, Event, Script, Cue, Attendance, Notification, Booking, Rating, Complaint
 
 
 # =========================
@@ -77,4 +77,16 @@ class NotificationAdmin(admin.ModelAdmin):
 
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ("customer", "event", "booking_date")    
+    list_display = ("customer", "event", "booking_date") 
+
+
+
+@admin.register(Rating)
+class RatingAdmin(admin.ModelAdmin):
+    list_display = ("customer", "event", "stars", "created_at")
+
+
+@admin.register(Complaint)
+class ComplaintAdmin(admin.ModelAdmin):
+    list_display = ("customer", "subject", "status", "created_at")
+    list_editable = ("status",)

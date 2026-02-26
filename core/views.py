@@ -3,9 +3,99 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Count
+from django import forms
 from django.utils import timezone
-from .models import Event, Cue, Notification, Attendance, Booking
-from .forms import EventForm, CueForm
+from .models import Event, Cue, Notification, Attendance, Booking, Rating, Complaint
+from .forms import EventForm, CueForm, RatingForm, ComplaintForm, AdminReplyForm
+
+
+
+@login_required
+def reply_complaint(request, pk):
+    if request.user.role != "admin":
+        return redirect("login")
+
+    complaint = get_object_or_404(Complaint, id=pk)
+
+    if request.method == "POST":
+        form = AdminReplyForm(request.POST, instance=complaint)
+        if form.is_valid():
+            obj = form.save(commit=False)
+
+            # 🔥 Automatically update status
+            obj.status = "Replied"
+            obj.reply_seen = False  # notify customer
+            obj.save()
+
+            return redirect("admin_complaints")
+    else:
+        form = AdminReplyForm(instance=complaint)
+
+    return render(request, "reply_complaint.html", {"form": form})
+
+
+@login_required
+def admin_complaints(request):
+    if request.user.role != "admin":
+        return redirect("login")
+
+    complaints = Complaint.objects.all()
+    return render(request, "admin_complaints.html", {
+        "complaints": complaints
+    })
+
+
+@login_required
+def view_complaints(request):
+    if request.user.role != "customer":
+        return redirect("login")
+
+    complaints = Complaint.objects.filter(customer=request.user)
+
+    # Mark replies as seen
+    complaints.filter(status="Replied").update(reply_seen=True)
+
+    return render(request, "view_complaints.html", {
+        "complaints": complaints
+    })
+
+
+@login_required
+def submit_complaint(request):
+    if request.user.role != "customer":
+        return redirect("login")
+
+    if request.method == "POST":
+        form = ComplaintForm(request.POST)
+        if form.is_valid():
+            complaint = form.save(commit=False)
+            complaint.customer = request.user
+            complaint.save()
+            return redirect("view_complaints")
+    else:
+        form = ComplaintForm()
+
+    return render(request, "submit_complaint.html", {"form": form})
+
+
+
+@login_required
+def give_rating(request):
+    if request.user.role != "customer":
+        return redirect("login")
+
+    if request.method == "POST":
+        form = RatingForm(request.POST)
+        if form.is_valid():
+            rating = form.save(commit=False)
+            rating.customer = request.user
+            rating.save()
+            return redirect("customer_dashboard")
+    else:
+        form = RatingForm()
+
+    return render(request, "give_rating.html", {"form": form})
+
 
 
 # =========================
@@ -36,8 +126,17 @@ def customer_dashboard(request):
         return redirect("login")
 
     events = Event.objects.filter(event_status="Scheduled")
+
+    # 🔔 Unseen replies
+    unread_replies = Complaint.objects.filter(
+        customer=request.user,
+        status="Replied",
+        reply_seen=False
+    ).count()
+
     return render(request, "customer_dashboard.html", {
-        "events": events
+        "events": events,
+        "unread_replies": unread_replies
     })
 
 
@@ -264,3 +363,25 @@ def performance_dashboard(request):
     )
 
     return render(request, "performance.html", {"data": data})
+
+
+# =========================
+# VIEW EVENT DETAILS
+# =========================
+@login_required
+def view_event(request, pk):
+    if request.user.role != "customer":
+        return redirect("login")
+
+    event = get_object_or_404(Event, id=pk)
+
+    # Check if already booked
+    already_booked = Booking.objects.filter(
+        customer=request.user,
+        event=event
+    ).exists()
+
+    return render(request, "view_event.html", {
+        "event": event,
+        "already_booked": already_booked
+    })

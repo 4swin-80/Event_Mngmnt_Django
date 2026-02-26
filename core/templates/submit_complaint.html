@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Submit Complaint</title>
+</head>
+<body>
+
+<h2>Submit Complaint</h2>
+
+<a href="{% url 'customer_dashboard' %}">Back</a>
+<hr>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit</button>
+</form>
+
+</body>
+</html>

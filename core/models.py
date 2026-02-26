@@ -185,3 +185,57 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"{self.customer.username} booked {self.event.name}"    
+    
+
+# =========================
+# Rating Model
+# =========================
+class Rating(models.Model):
+    customer = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="ratings"
+    )
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name="ratings"
+    )
+    stars = models.IntegerField()  # 1 to 5
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.customer.username} - {self.stars} Stars"
+
+
+# =========================
+# Complaint Model
+# =========================
+class Complaint(models.Model):
+    STATUS_CHOICES = (
+        ('Pending', 'Pending'),
+        ('Replied', 'Replied'),
+    )
+
+    customer = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="complaints"
+    )
+    subject = models.CharField(max_length=200)
+    message = models.TextField()
+    admin_reply = models.TextField(blank=True, null=True)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='Pending'
+    )
+
+    # 🔔 NEW FIELD
+    reply_seen = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Complaint by {self.customer.username}"

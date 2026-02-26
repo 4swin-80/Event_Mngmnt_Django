@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Complaints</title>
+</head>
+<body>
+
+<h2>My Complaints</h2>
+
+<a href="{% url 'customer_dashboard' %}">Back</a>
+<hr>
+
+{% for c in complaints %}
+    <div>
+        <strong>{{ c.subject }}</strong>
+        <p>{{ c.message }}</p>
+        <p>Status: {{ c.status }}</p>
+
+        {% if c.admin_reply %}
+            <p><strong>Admin Reply:</strong> {{ c.admin_reply }}</p>
+        {% endif %}
+    </div>
+    <hr>
+{% empty %}
+    <p>No complaints submitted.</p>
+{% endfor %}
+
+</body>
+</html>

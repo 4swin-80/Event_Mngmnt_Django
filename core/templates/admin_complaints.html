@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>All Complaints</title>
+</head>
+<body>
+
+<h2>All Customer Complaints</h2>
+
+<a href="{% url 'admin_dashboard' %}">Back</a>
+<hr>
+
+{% for c in complaints %}
+    <div>
+        <strong>Customer:</strong> {{ c.customer.username }} <br>
+        <strong>Subject:</strong> {{ c.subject }} <br>
+        <strong>Message:</strong> {{ c.message }} <br>
+        <strong>Status:</strong> {{ c.status }} <br>
+
+        {% if c.admin_reply %}
+            <strong>Admin Reply:</strong> {{ c.admin_reply }} <br>
+        {% endif %}
+
+        {% if c.status == "Pending" %}
+            <a href="{% url 'reply_complaint' c.id %}">
+                Reply
+            </a>
+        {% endif %}
+    </div>
+    <hr>
+{% empty %}
+    <p>No complaints available.</p>
+{% endfor %}
+
+</body>
+</html>

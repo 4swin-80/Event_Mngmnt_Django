@@ -1,7 +1,6 @@
 from django.contrib.auth.forms import AuthenticationForm
 from django import forms
-from .models import Event, Cue
-
+from .models import Event, Cue, Rating, Complaint
 
 class CueForm(forms.ModelForm):
     class Meta:
@@ -37,3 +36,24 @@ class EventForm(forms.ModelForm):
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'})
         }
+
+
+class RatingForm(forms.ModelForm):
+    class Meta:
+        model = Rating
+        fields = ['event', 'stars', 'description']
+        widgets = {
+            'stars': forms.NumberInput(attrs={'min': 1, 'max': 5})
+        }
+
+
+class ComplaintForm(forms.ModelForm):
+    class Meta:
+        model = Complaint
+        fields = ['subject', 'message']
+
+
+class AdminReplyForm(forms.ModelForm):
+    class Meta:
+        model = Complaint
+        fields = ['admin_reply']      

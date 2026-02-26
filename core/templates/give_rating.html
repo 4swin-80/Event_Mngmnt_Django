@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Give Rating</title>
+</head>
+<body>
+
+<h2>Give Event Rating</h2>
+
+<a href="{% url 'customer_dashboard' %}">Back</a>
+<hr>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit Rating</button>
+</form>
+
+</body>
+</html>

@@ -2,27 +2,120 @@
 <html>
 <head>
     <title>Customer Dashboard</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* 5 per row */
+            gap: 20px;
+        }
+
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: scale(1.03);
+        }
+
+        .card h4 {
+            margin-top: 0;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 6px 10px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 8px;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Responsive for smaller screens */
+        @media (max-width: 1200px) {
+            .card-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .card-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card-container {
+                grid-template-columns: repeat(1, 1fr);
+            }
+        }
+
+        .notification {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
-<h2>Available Events</h2>
+<h2>Customer Dashboard</h2>
+
+<p>
+Welcome {{ user.username }} |
 <a href="{% url 'logout' %}">Logout</a>
+</p>
+
 <hr>
 
-{% for event in events %}
-    <div>
-        <h3>{{ event.name }}</h3>
-        <p>Date: {{ event.date }}</p>
-        <p>Location: {{ event.location }}</p>
-        <a href="{% url 'book_event' event.id %}">Book Event</a>
-    </div>
+{% if unread_replies > 0 %}
+    <p class="notification">
+        🔔 You have {{ unread_replies }} new admin reply!
+        <a href="{% url 'view_complaints' %}">View Now</a>
+    </p>
     <hr>
+{% endif %}
+
+<h3>Available Events</h3>
+
+<div class="card-container">
+
+{% for event in events %}
+    <div class="card">
+        <h4>{{ event.name }}</h4>
+        <p><strong>Date:</strong> {{ event.date }}</p>
+        <p><strong>Location:</strong> {{ event.location }}</p>
+
+        <a class="btn" href="{% url 'view_event' event.id %}">
+            View Event
+        </a>
+    </div>
 {% empty %}
     <p>No events available.</p>
 {% endfor %}
 
-<br>
-<a href="{% url 'my_bookings' %}">View My Bookings</a>
+</div>
+
+<hr>
+
+<h3>My Actions</h3>
+
+<a href="{% url 'my_bookings' %}">My Bookings</a> |
+<a href="{% url 'give_rating' %}">Give Rating</a> |
+<a href="{% url 'submit_complaint' %}">Submit Complaint</a> |
+<a href="{% url 'view_complaints' %}">My Complaints</a>
 
 </body>
 </html>

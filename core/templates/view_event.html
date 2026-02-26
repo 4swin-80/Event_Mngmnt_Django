@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Event Details</title>
+</head>
+<body>
+
+<h2>Event Details</h2>
+
+<a href="{% url 'customer_dashboard' %}">Back</a> |
+<a href="{% url 'logout' %}">Logout</a>
+
+<hr>
+
+<h3>{{ event.name }}</h3>
+<p><strong>Date:</strong> {{ event.date }}</p>
+<p><strong>Location:</strong> {{ event.location }}</p>
+<p><strong>Status:</strong> {{ event.event_status }}</p>
+
+<hr>
+
+{% if already_booked %}
+    <p style="color:green;">You have already booked this event.</p>
+{% else %}
+    <a href="{% url 'book_event' event.id %}">
+        Book Event
+    </a>
+{% endif %}
+
+</body>
+</html>

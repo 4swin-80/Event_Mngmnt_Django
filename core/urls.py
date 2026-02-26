@@ -24,4 +24,10 @@ urlpatterns = [
     path('book-event/<int:pk>/', views.book_event, name='book_event'),
     path('my-bookings/', views.my_bookings, name='my_bookings'),
     path('cancel-booking/<int:pk>/', views.cancel_booking, name='cancel_booking'),
+    path('give-rating/', views.give_rating, name='give_rating'),
+    path('submit-complaint/', views.submit_complaint, name='submit_complaint'),
+    path('my-complaints/', views.view_complaints, name='view_complaints'),
+    path('admin-complaints/', views.admin_complaints, name='admin_complaints'),
+    path('reply-complaint/<int:pk>/', views.reply_complaint, name='reply_complaint'),
+    path('view-event/<int:pk>/', views.view_event, name='view_event'),
 ]
