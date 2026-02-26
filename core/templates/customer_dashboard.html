@@ -6,6 +6,37 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        /* 🔹 Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #007bff;
+            padding: 10px 20px;
+            color: white;
+        }
+
+        .navbar-left {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .navbar-right a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+        }
+
+        .navbar-right a:hover {
+            text-decoration: underline;
+        }
+
+        .container {
+            padding: 20px;
         }
 
         .card-container {
@@ -24,10 +55,6 @@
 
         .card:hover {
             transform: scale(1.03);
-        }
-
-        .card h4 {
-            margin-top: 0;
         }
 
         .btn {
@@ -71,19 +98,39 @@
             .card-container {
                 grid-template-columns: repeat(1, 1fr);
             }
+
+            .navbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .navbar-right {
+                margin-top: 10px;
+            }
         }
     </style>
 </head>
 <body>
 
-<h2>Customer Dashboard</h2>
+<!-- 🔹 Navbar -->
+<div class="navbar">
+    <div class="navbar-left">
+        <h3>NexEvent</h3>
+    </div>
 
-<p>
-Welcome {{ user.username }} |
-<a href="{% url 'logout' %}">Logout</a>
-</p>
+    <div class="navbar-right">
+        <a href="{% url 'my_bookings' %}">My Bookings</a>
+        <a href="{% url 'submit_complaint' %}">Submit Complaint</a>
+        <a href="{% url 'view_complaints' %}">My Complaints</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+</div>
 
-<hr>
+<div class="container">
+    Welcome {{ user.username }}
+</div>
+
+<div class="container">
 
 {% if unread_replies > 0 %}
     <p class="notification">
@@ -101,7 +148,6 @@ Welcome {{ user.username }} |
     <div class="card">
         <h4>{{ event.name }}</h4>
 
-        <!-- ⭐ Average Rating -->
         {% if event.avg_rating %}
             <div class="rating">
                 {% for i in "12345" %}
@@ -130,13 +176,7 @@ Welcome {{ user.username }} |
 
 </div>
 
-<hr>
-
-<h3>My Actions</h3>
-
-<a href="{% url 'my_bookings' %}">My Bookings</a> |
-<a href="{% url 'submit_complaint' %}">Submit Complaint</a> |
-<a href="{% url 'view_complaints' %}">My Complaints</a>
+</div>
 
 </body>
 </html>
