@@ -2,6 +2,29 @@
 <html>
 <head>
     <title>My Complaints</title>
+
+    <style>
+        .btn {
+            display: inline-block;
+            padding: 6px 12px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .complaint-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
 <body>
 
@@ -10,17 +33,21 @@
 <a href="{% url 'customer_dashboard' %}">Back</a>
 <hr>
 
+<!-- ✅ Submit Complaint Button -->
+<a class="btn" href="{% url 'submit_complaint' %}">
+    + Submit New Complaint
+</a>
+
 {% for c in complaints %}
-    <div>
+    <div class="complaint-box">
         <strong>{{ c.subject }}</strong>
         <p>{{ c.message }}</p>
-        <p>Status: {{ c.status }}</p>
+        <p><strong>Status:</strong> {{ c.status }}</p>
 
         {% if c.admin_reply %}
             <p><strong>Admin Reply:</strong> {{ c.admin_reply }}</p>
         {% endif %}
     </div>
-    <hr>
 {% empty %}
     <p>No complaints submitted.</p>
 {% endfor %}
