@@ -1,8 +1,18 @@
-{% extends "base.html" %}
-{% load static %}
-{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Operator Dashboard</title>
+</head>
+<body>
 
-<h2>Operator Dashboard</h2>
+{% load static %}
+
+<h1>Operator Dashboard</h1>
+
+<p>Welcome {{ user.username }} |
+<a href="{% url 'logout' %}">Logout</a></p>
+
+<hr>
 
 <h3>Pending Cues</h3>
 
@@ -15,6 +25,9 @@
     <p>No pending cues.</p>
 {% endfor %}
 
+<hr>
+
+<h3>Live Alerts</h3>
 <div id="alerts"></div>
 
 <audio id="alertSound" preload="auto">
@@ -22,35 +35,35 @@
 </audio>
 
 <script>
-    const socket = new WebSocket(
-        'ws://' + window.location.host + '/ws/alerts/'
-    );
-    
-    // 🔓 Unlock audio after first user interaction
-    document.body.addEventListener('click', function() {
-        const sound = document.getElementById("alertSound");
-        sound.play().then(() => {
-            sound.pause();
-            sound.currentTime = 0;
-        }).catch(() => {});
-    }, { once: true });
-    
-    socket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-    
-        const alertDiv = document.createElement("div");
-        alertDiv.innerHTML = data.message;
-        alertDiv.style.color = "red";
-        alertDiv.style.fontSize = "24px";
-        alertDiv.style.animation = "blink 1s infinite";
-    
-        document.getElementById("alerts").appendChild(alertDiv);
-    
-        const sound = document.getElementById("alertSound");
+const socket = new WebSocket(
+    'ws://' + window.location.host + '/ws/alerts/'
+);
+
+// Unlock autoplay
+document.body.addEventListener('click', function() {
+    const sound = document.getElementById("alertSound");
+    sound.play().then(() => {
+        sound.pause();
         sound.currentTime = 0;
-        sound.play();
-    };
-    </script>
+    }).catch(() => {});
+}, { once: true });
+
+socket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+
+    const alertDiv = document.createElement("div");
+    alertDiv.innerHTML = data.message;
+    alertDiv.style.color = "red";
+    alertDiv.style.fontSize = "24px";
+    alertDiv.style.animation = "blink 1s infinite";
+
+    document.getElementById("alerts").appendChild(alertDiv);
+
+    const sound = document.getElementById("alertSound");
+    sound.currentTime = 0;
+    sound.play();
+};
+</script>
 
 <style>
 @keyframes blink {
@@ -60,4 +73,5 @@
 }
 </style>
 
-{% endblock %}
+</body>
+</html>

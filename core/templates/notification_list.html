@@ -1,7 +1,16 @@
-{% extends "base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Notifications</title>
+</head>
+<body>
 
-<h2>Notifications</h2>
+<h1>Notifications</h1>
+
+<a href="{% url 'admin_dashboard' %}">Back to Dashboard</a> |
+<a href="{% url 'logout' %}">Logout</a>
+
+<hr>
 
 {% for n in notifications %}
     <div>
@@ -14,4 +23,5 @@
     <p>No notifications available.</p>
 {% endfor %}
 
-{% endblock %}
+</body>
+</html>

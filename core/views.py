@@ -4,9 +4,56 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Count
 from django.utils import timezone
-
-from .models import Event, Cue, Notification, Attendance
+from .models import Event, Cue, Notification, Attendance, Booking
 from .forms import EventForm, CueForm
+
+
+# =========================
+# CUSTOMER DASHBOARD
+# =========================
+@login_required
+def customer_dashboard(request):
+    if request.user.role != "customer":
+        return redirect("login")
+
+    events = Event.objects.filter(event_status="Scheduled")
+    return render(request, "customer_dashboard.html", {
+        "events": events
+    })
+
+
+# =========================
+# BOOK EVENT
+# =========================
+@login_required
+def book_event(request, pk):
+    if request.user.role != "customer":
+        return redirect("login")
+
+    event = get_object_or_404(Event, id=pk)
+
+    # Prevent duplicate booking
+    if not Booking.objects.filter(customer=request.user, event=event).exists():
+        Booking.objects.create(
+            customer=request.user,
+            event=event
+        )
+
+    return redirect("my_bookings")
+
+
+# =========================
+# MY BOOKINGS
+# =========================
+@login_required
+def my_bookings(request):
+    if request.user.role != "customer":
+        return redirect("login")
+
+    bookings = Booking.objects.filter(customer=request.user)
+    return render(request, "my_bookings.html", {
+        "bookings": bookings
+    })
 
 
 # =========================
@@ -16,8 +63,10 @@ def login_view(request):
     if request.user.is_authenticated:
         if request.user.role == "admin":
             return redirect("admin_dashboard")
-        else:
+        elif request.user.role == "operator":
             return redirect("operator_dashboard")
+        else:
+            return redirect("customer_dashboard")
 
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
@@ -25,10 +74,12 @@ def login_view(request):
             user = form.get_user()
             login(request, user)
 
-            if user.role == "admin":
+            if request.user.role == "admin":
                 return redirect("admin_dashboard")
-            else:
+            elif request.user.role == "operator":
                 return redirect("operator_dashboard")
+            else:
+                return redirect("customer_dashboard")
     else:
         form = AuthenticationForm()
 

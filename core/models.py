@@ -10,6 +10,7 @@ class User(AbstractUser):
     ROLE_CHOICES = (
         ('admin', 'Admin'),
         ('operator', 'Operator'),
+        ('customer', 'Customer'),
     )
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
@@ -165,3 +166,22 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.cue.cue_action}"
+    
+# =========================
+# Booking Model
+# =========================
+class Booking(models.Model):
+    customer = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="bookings"
+    )
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name="bookings"
+    )
+    booking_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.customer.username} booked {self.event.name}"    

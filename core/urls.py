@@ -20,4 +20,7 @@ urlpatterns = [
     path('attendance/', views.attendance_view, name='attendance'),
 
     path('performance/', views.performance_dashboard, name='performance'),
+    path('customer-dashboard/', views.customer_dashboard, name='customer_dashboard'),
+    path('book-event/<int:pk>/', views.book_event, name='book_event'),
+    path('my-bookings/', views.my_bookings, name='my_bookings'),
 ]

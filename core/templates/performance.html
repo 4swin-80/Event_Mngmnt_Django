@@ -1,13 +1,26 @@
-{% extends "base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Performance Analytics</title>
+</head>
+<body>
 
-<h2>Performance Analytics</h2>
+<h1>Performance Analytics</h1>
+
+<a href="{% url 'admin_dashboard' %}">Back to Dashboard</a> |
+<a href="{% url 'logout' %}">Logout</a>
+
+<hr>
 
 {% for item in data %}
     <div>
         {{ item.operator__username }} :
         {{ item.total_tasks }} Tasks
     </div>
+    <hr>
+{% empty %}
+    <p>No performance data available.</p>
 {% endfor %}
 
-{% endblock %}
+</body>
+</html>

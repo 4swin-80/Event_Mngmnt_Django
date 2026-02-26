@@ -1,10 +1,33 @@
-{% extends "base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+</head>
+<body>
 
-<h2>Admin Dashboard</h2>
+<h1>Admin Dashboard</h1>
+
+<p>Welcome {{ user.username }} |
+<a href="{% url 'logout' %}">Logout</a></p>
+
+<hr>
+
+<nav>
+    <a href="{% url 'admin_dashboard' %}">Dashboard</a> |
+    <a href="{% url 'event_list' %}">Events</a> |
+    <a href="{% url 'cue_list' %}">Cues</a> |
+    <a href="{% url 'notification_list' %}">Notifications</a> |
+    <a href="{% url 'attendance' %}">Attendance</a> |
+    <a href="{% url 'performance' %}">Performance</a>
+</nav>
+
+<hr>
+
+<h2>System Overview</h2>
 
 <p>Total Events: {{ total_events }}</p>
 <p>Total Cues: {{ total_cues }}</p>
 <p>Total Operators Active: {{ total_operators }}</p>
 
-{% endblock %}
+</body>
+</html>

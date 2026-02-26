@@ -1,7 +1,16 @@
-{% extends "base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance</title>
+</head>
+<body>
 
-<h2>Attendance</h2>
+<h1>Attendance Records</h1>
+
+<a href="{% url 'admin_dashboard' %}">Back to Dashboard</a> |
+<a href="{% url 'logout' %}">Logout</a>
+
+<hr>
 
 {% for a in attendance %}
     <div>
@@ -10,6 +19,10 @@
         {{ a.status }} |
         {{ a.check_in_time }}
     </div>
+    <hr>
+{% empty %}
+    <p>No attendance records.</p>
 {% endfor %}
 
-{% endblock %}
+</body>
+</html>

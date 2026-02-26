@@ -1,9 +1,19 @@
-{% extends "base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cue List</title>
+</head>
+<body>
 
-<h2>All Cues</h2>
+<h1>All Cues</h1>
+
+<a href="{% url 'admin_dashboard' %}">Back to Dashboard</a> |
+<a href="{% url 'logout' %}">Logout</a>
+
+<hr>
 
 <a href="{% url 'cue_create' %}">Create Cue</a>
+
 <br><br>
 
 {% for cue in cues %}
@@ -19,4 +29,5 @@
     <p>No cues available.</p>
 {% endfor %}
 
-{% endblock %}
+</body>
+</html>

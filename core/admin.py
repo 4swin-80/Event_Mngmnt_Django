@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Event, Script, Cue, Attendance, Notification
+from .models import User, Event, Script, Cue, Attendance, Notification, Booking
 
 
 # =========================
@@ -73,3 +73,8 @@ class AttendanceAdmin(admin.ModelAdmin):
 class NotificationAdmin(admin.ModelAdmin):
     list_display = ("cue", "alert_time", "alert_status")
     list_filter = ("alert_status",)
+
+
+@admin.register(Booking)
+class BookingAdmin(admin.ModelAdmin):
+    list_display = ("customer", "event", "booking_date")    

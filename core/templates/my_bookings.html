@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Bookings</title>
+</head>
+<body>
+
+<h2>My Booked Events</h2>
+<a href="{% url 'customer_dashboard' %}">Back</a>
+<hr>
+
+{% for booking in bookings %}
+    <div>
+        <strong>{{ booking.event.name }}</strong>
+        <p>Date: {{ booking.event.date }}</p>
+        <p>Location: {{ booking.event.location }}</p>
+        <p>Booked On: {{ booking.booking_date }}</p>
+    </div>
+    <hr>
+{% empty %}
+    <p>You have not booked any events.</p>
+{% endfor %}
+
+</body>
+</html>

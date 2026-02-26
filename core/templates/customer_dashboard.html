@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer Dashboard</title>
+</head>
+<body>
+
+<h2>Available Events</h2>
+<a href="{% url 'logout' %}">Logout</a>
+<hr>
+
+{% for event in events %}
+    <div>
+        <h3>{{ event.name }}</h3>
+        <p>Date: {{ event.date }}</p>
+        <p>Location: {{ event.location }}</p>
+        <a href="{% url 'book_event' event.id %}">Book Event</a>
+    </div>
+    <hr>
+{% empty %}
+    <p>No events available.</p>
+{% endfor %}
+
+<br>
+<a href="{% url 'my_bookings' %}">View My Bookings</a>
+
+</body>
+</html>
