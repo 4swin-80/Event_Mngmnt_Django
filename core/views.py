@@ -2,11 +2,32 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.db.models import Count
+from django.db.models import Count, Avg
 from django import forms
 from django.utils import timezone
 from .models import Event, Cue, Notification, Attendance, Booking, Rating, Complaint
 from .forms import EventForm, CueForm, RatingForm, ComplaintForm, AdminReplyForm
+
+
+
+# =========================
+# DELETE RATING
+# =========================
+@login_required
+def delete_rating(request, pk):
+    if request.user.role != "customer":
+        return redirect("login")
+
+    rating = get_object_or_404(
+        Rating,
+        id=pk,
+        customer=request.user   # 🔐 Security: only own rating
+    )
+
+    event_id = rating.event.id
+    rating.delete()
+
+    return redirect("view_event", pk=event_id)
 
 
 
@@ -125,9 +146,14 @@ def customer_dashboard(request):
     if request.user.role != "customer":
         return redirect("login")
 
-    events = Event.objects.filter(event_status="Scheduled")
+    # Annotate average rating
+    events = Event.objects.filter(
+        event_status="Scheduled"
+    ).annotate(
+        avg_rating=Avg('ratings__stars')
+    )
 
-    # 🔔 Unseen replies
+    # 🔔 Unseen admin replies
     unread_replies = Complaint.objects.filter(
         customer=request.user,
         status="Replied",
@@ -368,6 +394,7 @@ def performance_dashboard(request):
 # =========================
 # VIEW EVENT DETAILS
 # =========================
+
 @login_required
 def view_event(request, pk):
     if request.user.role != "customer":
@@ -375,13 +402,37 @@ def view_event(request, pk):
 
     event = get_object_or_404(Event, id=pk)
 
-    # Check if already booked
     already_booked = Booking.objects.filter(
         customer=request.user,
         event=event
     ).exists()
 
+    # ⭐ Average Rating
+    avg_rating = Rating.objects.filter(event=event).aggregate(
+        Avg('stars')
+    )['stars__avg']
+
+    # Prevent multiple ratings
+    existing_rating = Rating.objects.filter(
+        customer=request.user,
+        event=event
+    ).first()
+
+    if request.method == "POST":
+        form = RatingForm(request.POST)
+        if form.is_valid() and not existing_rating:
+            rating = form.save(commit=False)
+            rating.customer = request.user
+            rating.event = event   # 🔥 auto assign
+            rating.save()
+            return redirect('view_event', pk=event.id)
+    else:
+        form = RatingForm()
+
     return render(request, "view_event.html", {
         "event": event,
-        "already_booked": already_booked
+        "already_booked": already_booked,
+        "avg_rating": avg_rating,
+        "form": form,
+        "existing_rating": existing_rating,
     })

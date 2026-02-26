@@ -41,10 +41,7 @@ class EventForm(forms.ModelForm):
 class RatingForm(forms.ModelForm):
     class Meta:
         model = Rating
-        fields = ['event', 'stars', 'description']
-        widgets = {
-            'stars': forms.NumberInput(attrs={'min': 1, 'max': 5})
-        }
+        fields = ['stars', 'description']  
 
 
 class ComplaintForm(forms.ModelForm):

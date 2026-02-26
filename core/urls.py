@@ -30,4 +30,5 @@ urlpatterns = [
     path('admin-complaints/', views.admin_complaints, name='admin_complaints'),
     path('reply-complaint/<int:pk>/', views.reply_complaint, name='reply_complaint'),
     path('view-event/<int:pk>/', views.view_event, name='view_event'),
+    path('delete-rating/<int:pk>/', views.delete_rating, name='delete_rating'),
 ]
