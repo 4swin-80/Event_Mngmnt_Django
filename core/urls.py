@@ -23,4 +23,5 @@ urlpatterns = [
     path('customer-dashboard/', views.customer_dashboard, name='customer_dashboard'),
     path('book-event/<int:pk>/', views.book_event, name='book_event'),
     path('my-bookings/', views.my_bookings, name='my_bookings'),
+    path('cancel-booking/<int:pk>/', views.cancel_booking, name='cancel_booking'),
 ]

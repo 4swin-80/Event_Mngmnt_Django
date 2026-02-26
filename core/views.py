@@ -9,6 +9,25 @@ from .forms import EventForm, CueForm
 
 
 # =========================
+# CANCEL BOOKING
+# =========================
+@login_required
+def cancel_booking(request, pk):
+    if request.user.role != "customer":
+        return redirect("login")
+
+    booking = get_object_or_404(
+        Booking,
+        id=pk,
+        customer=request.user   # 🔐 security check
+    )
+
+    booking.delete()
+
+    return redirect("my_bookings")
+
+
+# =========================
 # CUSTOMER DASHBOARD
 # =========================
 @login_required

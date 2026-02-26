@@ -6,7 +6,10 @@
 <body>
 
 <h2>My Booked Events</h2>
-<a href="{% url 'customer_dashboard' %}">Back</a>
+
+<a href="{% url 'customer_dashboard' %}">Back</a> |
+<a href="{% url 'logout' %}">Logout</a>
+
 <hr>
 
 {% for booking in bookings %}
@@ -15,6 +18,11 @@
         <p>Date: {{ booking.event.date }}</p>
         <p>Location: {{ booking.event.location }}</p>
         <p>Booked On: {{ booking.booking_date }}</p>
+
+        <!-- 🔥 Cancel Button -->
+        <a href="{% url 'cancel_booking' booking.id %}">
+            Cancel Booking
+        </a>
     </div>
     <hr>
 {% empty %}
