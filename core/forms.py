@@ -1,6 +1,6 @@
 from django.contrib.auth.forms import AuthenticationForm
 from django import forms
-from .models import Event, Cue, Rating, Complaint, Booking
+from .models import Event, Cue, Rating, Complaint, Booking, User
 
 
 class BookingForm(forms.ModelForm):
@@ -18,6 +18,7 @@ class BookingForm(forms.ModelForm):
         }
 
 class CueForm(forms.ModelForm):
+
     class Meta:
         model = Cue
         fields = [
@@ -31,6 +32,23 @@ class CueForm(forms.ModelForm):
         widgets = {
             'cue_time': forms.TimeInput(attrs={'type': 'time'})
         }
+
+    def __init__(self, *args, **kwargs):
+        event_id = kwargs.pop('event_id', None)
+        super().__init__(*args, **kwargs)
+
+        # ✅ Show only operators
+        self.fields['operator'].queryset = User.objects.filter(role='operator')
+
+        # ✅ Show operator role in dropdown
+        self.fields['operator'].label_from_instance = (
+            lambda obj: f"{obj.operator_role} - {obj.username}"
+        )
+
+        # ✅ Auto-select event if provided
+        if event_id:
+            self.fields['event'].initial = event_id
+            self.fields['event'].widget.attrs['readonly'] = True
 
 
 class LoginForm(AuthenticationForm):

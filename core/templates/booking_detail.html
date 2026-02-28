@@ -13,6 +13,6 @@
 
 <br>
 
-<a href="{% url 'cue_create' %}" class="btn">
+<a href="{% url 'cue_create' %}?event_id={{ booking.event.id }}" class="btn">
     Create Cue
 </a>

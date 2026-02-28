@@ -128,7 +128,16 @@ class Cue(models.Model):
     )
     cue_time = models.TimeField()
     cue_action = models.CharField(max_length=100)
-    cue_type = models.CharField(max_length=30)
+    CUE_TYPE_CHOICES = (
+        ('lighting', 'Lighting'),
+        ('sound', 'Sound'),
+        ('stage', 'Stage'),
+    )
+
+    cue_type = models.CharField(
+        max_length=30,
+        choices=CUE_TYPE_CHOICES
+    )
     pre_alert_sec = models.IntegerField(default=0)
     cue_status = models.CharField(
         max_length=30,

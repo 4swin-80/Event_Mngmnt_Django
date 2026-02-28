@@ -1,8 +1,34 @@
 <h2>Create Cue</h2>
-<a href="{% url 'admin_dashboard' %}">Back to Dashboard</a>
 
+<a href="{% url 'admin_dashboard' %}">Back to Dashboard</a>
+<hr>
+<br>
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+
+    {{ form.event.label_tag }}
+    {{ form.event }}
+    <br><br>
+
+    {{ form.operator.label_tag }}
+    {{ form.operator }}
+    <br><br>
+
+    {{ form.cue_time.label_tag }}
+    {{ form.cue_time }}
+    <br><br>
+
+    {{ form.cue_action.label_tag }}
+    {{ form.cue_action }}
+    <br><br>
+
+    {{ form.cue_type.label_tag }}
+    {{ form.cue_type }}
+    <br><br>
+
+    {{ form.pre_alert_sec.label_tag }}
+    {{ form.pre_alert_sec }}
+    <br><br>
+
     <button type="submit">Save Cue</button>
 </form>

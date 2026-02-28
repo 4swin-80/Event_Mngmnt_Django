@@ -390,13 +390,15 @@ def cue_create(request):
     if request.user.role != "admin":
         return redirect("login")
 
+    event_id = request.GET.get("event_id")
+
     if request.method == "POST":
-        form = CueForm(request.POST)
+        form = CueForm(request.POST, event_id=event_id)
         if form.is_valid():
             form.save()
             return redirect("cue_list")
     else:
-        form = CueForm()
+        form = CueForm(event_id=event_id)
 
     return render(request, "cue_form.html", {"form": form})
 
