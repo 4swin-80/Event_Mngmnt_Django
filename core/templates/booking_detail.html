@@ -1,0 +1,18 @@
+<h2>Booking Details</h2>
+<a href="{% url 'admin_dashboard' %}">Back to Dashboard</a>
+<hr>
+
+<p><strong>Customer Name:</strong> {{ booking.customer_name }}</p>
+<p><strong>Username:</strong> {{ booking.customer.username }}</p>
+<p><strong>Email:</strong> {{ booking.email }}</p>
+<p><strong>Mobile:</strong> {{ booking.mobile }}</p>
+<p><strong>Location:</strong> {{ booking.location }}</p>
+<p><strong>Event:</strong> {{ booking.event.name }}</p>
+<p><strong>Event Date:</strong> {{ booking.event_date }}</p>
+<p><strong>Booked On:</strong> {{ booking.booking_date }}</p>
+
+<br>
+
+<a href="{% url 'cue_create' %}" class="btn">
+    Create Cue
+</a>

@@ -5,26 +5,50 @@ from django.utils import timezone
 
 # =========================
 # Custom User Model
-# =========================
+# =========================#
 class User(AbstractUser):
+
     ROLE_CHOICES = (
         ('admin', 'Admin'),
         ('operator', 'Operator'),
         ('customer', 'Customer'),
     )
 
+    OPERATOR_ROLE_CHOICES = (
+        ('lighting', 'Lighting'),
+        ('sound', 'Sound'),
+        ('stage', 'Stage'),
+    )
+
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+
     phone = models.CharField(max_length=15, blank=True, null=True)
+
     operator_role = models.CharField(
         max_length=30,
+        choices=OPERATOR_ROLE_CHOICES,
         blank=True,
-        null=True,
-        help_text="Lighting / Sound / etc."
+        null=True
     )
+
     status = models.CharField(
         max_length=20,
         default="Active"
     )
+
+    def clean(self):
+        """
+        Custom validation:
+        - If role is operator → operator_role required
+        - If role is not operator → operator_role must be empty
+        """
+        from django.core.exceptions import ValidationError
+
+        if self.role == "operator" and not self.operator_role:
+            raise ValidationError("Operator role is required for operators.")
+
+        if self.role != "operator" and self.operator_role:
+            raise ValidationError("Only operators can have an operator role.")
 
     def __str__(self):
         return f"{self.username} ({self.role})"

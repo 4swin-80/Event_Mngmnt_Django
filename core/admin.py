@@ -11,7 +11,7 @@ class CustomUserAdmin(UserAdmin):
 
     fieldsets = UserAdmin.fieldsets + (
         ("Additional Info", {
-            "fields": ("role", "phone", "operator_role", "status"),
+            "fields": ("role", "operator_role", "phone", "status"),
         }),
     )
 
@@ -19,11 +19,12 @@ class CustomUserAdmin(UserAdmin):
         "username",
         "email",
         "role",
+        "operator_role",
         "status",
         "is_staff",
     )
 
-    list_filter = ("role", "status")
+    list_filter = ("role", "operator_role", "status")
 
 
 admin.site.register(User, CustomUserAdmin)

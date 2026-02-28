@@ -4,10 +4,27 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Count, Avg
 from django import forms
+from django.contrib import messages
 from django.utils import timezone
 from .models import Event, Cue, Notification, Attendance, Booking, Rating, Complaint
 from .forms import EventForm, CueForm, RatingForm, ComplaintForm, AdminReplyForm, BookingForm
 
+
+
+@login_required
+def booking_detail(request, pk):
+    if request.user.role != "admin":
+        return redirect("login")
+
+    booking = get_object_or_404(
+        Booking,
+        id=pk,
+        event__admin=request.user
+    )
+
+    return render(request, "booking_detail.html", {
+        "booking": booking
+    })
 
 
 # =========================
@@ -130,10 +147,18 @@ def cancel_booking(request, pk):
     booking = get_object_or_404(
         Booking,
         id=pk,
-        customer=request.user   # 🔐 security check
+        customer=request.user
     )
 
+    event_name = booking.event.name
+    admin_user = booking.event.admin
+
     booking.delete()
+
+    messages.warning(
+        request,
+        f"{request.user.username} cancelled booking for {event_name}"
+    )
 
     return redirect("my_bookings")
 
@@ -183,6 +208,13 @@ def book_event(request, pk):
             booking.customer = request.user
             booking.event = event
             booking.save()
+
+            # 🔔 Notify Admin
+            messages.success(
+                request,
+                f"{request.user.username} booked {event.name}"
+            )
+
             return redirect("my_bookings")
     else:
         form = BookingForm()
@@ -254,10 +286,16 @@ def admin_dashboard(request):
     total_cues = Cue.objects.count()
     total_operators = Attendance.objects.values("operator").distinct().count()
 
+    # 🔥 Get all bookings of admin's events
+    bookings = Booking.objects.filter(
+        event__admin=request.user
+    ).select_related("event", "customer").order_by("-booking_date")
+
     return render(request, "admin_dashboard.html", {
         "total_events": total_events,
         "total_cues": total_cues,
         "total_operators": total_operators,
+        "bookings": bookings,
     })
 
 
