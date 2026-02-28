@@ -13,6 +13,11 @@
 <a href="{% url 'logout' %}">Logout</a></p>
 
 <hr>
+<h3>Attendance</h3>
+
+<a href="{% url 'check_in' %}">🟢 Check In</a>
+<a href="{% url 'check_out' %}">🔴 Check Out</a>
+<hr>
 
 <h3>Pending Cues</h3>
 
@@ -20,6 +25,7 @@
     <div>
         <strong>{{ cue.cue_action }}</strong>
         ({{ cue.cue_time }})
+        <a href="{% url 'complete_cue' cue.id %}">✅ Mark Completed</a>
     </div>
 {% empty %}
     <p>No pending cues.</p>
@@ -35,9 +41,22 @@
 </audio>
 
 <script>
-const socket = new WebSocket(
-    'ws://' + window.location.host + '/ws/alerts/'
-);
+    const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+    const socket = new WebSocket(
+        protocol + window.location.host + "/ws/alerts/"
+    );
+    
+    socket.onopen = function() {
+        console.log("WebSocket connected ✅");
+    };
+    
+    socket.onerror = function(e) {
+        console.log("WebSocket error ❌", e);
+    };
+    
+    socket.onclose = function() {
+        console.log("WebSocket closed");
+    };
 
 // Unlock autoplay
 document.body.addEventListener('click', function() {

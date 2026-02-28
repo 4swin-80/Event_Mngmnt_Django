@@ -36,10 +36,6 @@ def check_and_trigger_cues():
                     alert_status="Triggered"
                 )
 
-                # Mark cue completed
-                cue.cue_status = "Completed"
-                cue.save()
-
                 # 🔥 AUTO ATTENDANCE
                 Attendance.objects.get_or_create(
                     operator=cue.operator,

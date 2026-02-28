@@ -6,6 +6,7 @@ from django.db.models import Count, Avg
 from django import forms
 from django.contrib import messages
 from django.utils import timezone
+from datetime import timedelta
 from .models import Event, Cue, Notification, Attendance, Booking, Rating, Complaint
 from .forms import EventForm, CueForm, RatingForm, ComplaintForm, AdminReplyForm, BookingForm
 
@@ -417,8 +418,15 @@ def notification_list(request):
 # =========================
 @login_required
 def attendance_view(request):
-    attendance = Attendance.objects.all()
-    return render(request, "attendance.html", {"attendance": attendance})
+    records = Attendance.objects.all()
+
+    for record in records:
+        if record.check_in_time and record.check_out_time:
+            record.total_time = record.check_out_time - record.check_in_time
+        else:
+            record.total_time = None
+
+    return render(request, "attendance.html", {"attendance": records})
 
 
 # =========================
@@ -483,3 +491,77 @@ def view_event(request, pk):
         "form": form,
         "existing_rating": existing_rating,
     })
+
+
+@login_required
+def complete_cue(request, pk):
+    if request.user.role != "operator":
+        return redirect("login")
+
+    cue = get_object_or_404(
+        Cue,
+        id=pk,
+        operator=request.user
+    )
+
+    cue.cue_status = "Completed"
+    cue.save()
+
+    return redirect("operator_dashboard")
+
+
+@login_required
+def check_in(request):
+    if request.user.role != "operator":
+        return redirect("login")
+
+    # Get operator's upcoming/pending cue
+    cue = Cue.objects.filter(
+        operator=request.user,
+        cue_status="Pending"
+    ).select_related("event").first()
+
+    if not cue:
+        messages.error(request, "No assigned event found.")
+        return redirect("operator_dashboard")
+
+    # Prevent double check-in
+    already_checked = Attendance.objects.filter(
+        operator=request.user,
+        event=cue.event,
+        check_out_time__isnull=True
+    ).exists()
+
+    if already_checked:
+        messages.warning(request, "Already checked in.")
+        return redirect("operator_dashboard")
+
+    Attendance.objects.create(
+        operator=request.user,
+        event=cue.event,
+        check_in_time=timezone.now(),
+        status="Present"
+    )
+
+    messages.success(request, "Checked in successfully.")
+    return redirect("operator_dashboard")
+
+
+@login_required
+def check_out(request):
+    if request.user.role != "operator":
+        return redirect("login")
+
+    attendance = Attendance.objects.filter(
+        operator=request.user,
+        check_out_time__isnull=True
+    ).last()
+
+    if attendance:
+        attendance.check_out_time = timezone.now()
+        attendance.save()
+        messages.success(request, "Checked out successfully.")
+    else:
+        messages.error(request, "You are not checked in.")
+
+    return redirect("operator_dashboard")

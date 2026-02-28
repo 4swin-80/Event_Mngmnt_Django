@@ -14,10 +14,15 @@
 
 {% for a in attendance %}
     <div>
-        {{ a.operator.username }} |
-        {{ a.event.name }} |
-        {{ a.status }} |
-        {{ a.check_in_time }}
+        <strong>{{ a.operator.username }}</strong> |
+        Check-In: {{ a.check_in_time }} |
+        Check-Out: {{ a.check_out_time }} |
+
+        {% if a.total_time %}
+            Total: {{ a.total_time }}
+        {% else %}
+            Working...
+        {% endif %}
     </div>
     <hr>
 {% empty %}
