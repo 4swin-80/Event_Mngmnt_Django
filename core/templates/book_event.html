@@ -1,0 +1,9 @@
+<h2>Book {{ event.name }}</h2>
+
+<p>Price: ₹{{ event.price }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Confirm Booking</button>
+</form>

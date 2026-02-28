@@ -1,6 +1,21 @@
 from django.contrib.auth.forms import AuthenticationForm
 from django import forms
-from .models import Event, Cue, Rating, Complaint
+from .models import Event, Cue, Rating, Complaint, Booking
+
+
+class BookingForm(forms.ModelForm):
+    class Meta:
+        model = Booking
+        fields = [
+            'customer_name',
+            'location',
+            'mobile',
+            'email',
+            'event_date'
+        ]
+        widgets = {
+            'event_date': forms.DateInput(attrs={'type': 'date'})
+        }
 
 class CueForm(forms.ModelForm):
     class Meta:
@@ -32,10 +47,7 @@ class LoginForm(AuthenticationForm):
 class EventForm(forms.ModelForm):
     class Meta:
         model = Event
-        fields = ['name', 'date', 'location', 'event_status']
-        widgets = {
-            'date': forms.DateInput(attrs={'type': 'date'})
-        }
+        fields = ['name', 'details', 'price', 'image']
 
 
 class RatingForm(forms.ModelForm):

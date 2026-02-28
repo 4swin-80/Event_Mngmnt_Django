@@ -34,9 +34,8 @@ admin.site.register(User, CustomUserAdmin)
 # =========================
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ("name", "date", "location", "event_status")
-    list_filter = ("event_status", "date")
-    search_fields = ("name", "location")
+    list_display = ("name", "price", "event_status")
+    search_fields = ("name",)
 
 
 # =========================

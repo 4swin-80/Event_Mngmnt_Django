@@ -6,7 +6,7 @@ from django.db.models import Count, Avg
 from django import forms
 from django.utils import timezone
 from .models import Event, Cue, Notification, Attendance, Booking, Rating, Complaint
-from .forms import EventForm, CueForm, RatingForm, ComplaintForm, AdminReplyForm
+from .forms import EventForm, CueForm, RatingForm, ComplaintForm, AdminReplyForm, BookingForm
 
 
 
@@ -176,14 +176,21 @@ def book_event(request, pk):
 
     event = get_object_or_404(Event, id=pk)
 
-    # Prevent duplicate booking
-    if not Booking.objects.filter(customer=request.user, event=event).exists():
-        Booking.objects.create(
-            customer=request.user,
-            event=event
-        )
+    if request.method == "POST":
+        form = BookingForm(request.POST)
+        if form.is_valid():
+            booking = form.save(commit=False)
+            booking.customer = request.user
+            booking.event = event
+            booking.save()
+            return redirect("my_bookings")
+    else:
+        form = BookingForm()
 
-    return redirect("my_bookings")
+    return render(request, "book_event.html", {
+        "form": form,
+        "event": event
+    })
 
 
 # =========================
