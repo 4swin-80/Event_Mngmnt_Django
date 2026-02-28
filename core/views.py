@@ -294,7 +294,7 @@ def event_create(request):
         return redirect("login")
 
     if request.method == "POST":
-        form = EventForm(request.POST)
+        form = EventForm(request.POST, request.FILES)
         if form.is_valid():
             event = form.save(commit=False)
             event.admin = request.user
@@ -314,7 +314,7 @@ def event_update(request, pk):
         return redirect("login")
 
     if request.method == "POST":
-        form = EventForm(request.POST, instance=event)
+        form = EventForm(request.POST, request.FILES, instance=event)
         if form.is_valid():
             form.save()
             return redirect("event_list")
