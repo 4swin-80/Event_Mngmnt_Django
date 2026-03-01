@@ -2,12 +2,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.db.models import Count, Avg
+from django.db.models import Count, Avg, Sum
 from django import forms
 from django.contrib import messages
+from decimal import Decimal
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 from datetime import timedelta
-from .models import Event, Cue, Notification, Attendance, Booking, Rating, Complaint
+from .models import Event, Cue, Notification, Attendance, Booking, Rating, Complaint, Salary
 from .forms import EventForm, CueForm, RatingForm, ComplaintForm, AdminReplyForm, BookingForm
 
 
@@ -416,17 +418,44 @@ def notification_list(request):
 # =========================
 # ATTENDANCE
 # =========================
+
 @login_required
 def attendance_view(request):
-    records = Attendance.objects.all()
+    if request.user.role != "admin":
+        return redirect("login")
+
+    records = Attendance.objects.select_related(
+        "operator", "event"
+    ).order_by("-id")
 
     for record in records:
+
+        # Calculate worked seconds and salary
         if record.check_in_time and record.check_out_time:
-            record.total_time = record.check_out_time - record.check_in_time
+            total_seconds = int(
+                (record.check_out_time - record.check_in_time).total_seconds()
+            )
+            record.total_time = total_seconds
+            record.calculated_salary = total_seconds
         else:
             record.total_time = None
+            record.calculated_salary = None
 
-    return render(request, "attendance.html", {"attendance": records})
+        # Total salary paid to this operator
+        record.operator_total_salary = (
+            Salary.objects.filter(operator=record.operator)
+            .aggregate(Sum("total_amount"))["total_amount__sum"] or 0
+        )
+
+    # Overall total paid salary
+    total_paid = (
+        Salary.objects.aggregate(Sum("total_amount"))["total_amount__sum"] or 0
+    )
+
+    return render(request, "attendance.html", {
+        "attendance": records,
+        "total_paid": total_paid
+    })
 
 
 # =========================
@@ -515,20 +544,18 @@ def check_in(request):
     if request.user.role != "operator":
         return redirect("login")
 
-    # Get operator's upcoming/pending cue
+    # Get latest assigned event from cue (any status)
     cue = Cue.objects.filter(
-        operator=request.user,
-        cue_status="Pending"
-    ).select_related("event").first()
+        operator=request.user
+    ).select_related("event").order_by("-cue_date").first()
 
     if not cue:
-        messages.error(request, "No assigned event found.")
+        messages.error(request, "No event assigned.")
         return redirect("operator_dashboard")
 
     # Prevent double check-in
     already_checked = Attendance.objects.filter(
         operator=request.user,
-        event=cue.event,
         check_out_time__isnull=True
     ).exists()
 
@@ -585,3 +612,68 @@ def test_alert(request):
     )
 
     return JsonResponse({"status": "sent"})
+
+
+
+@login_required
+@require_POST
+def pay_salary(request, attendance_id):
+    if request.user.role != "admin":
+        return redirect("login")
+
+    attendance = get_object_or_404(Attendance, id=attendance_id)
+
+    if not attendance.check_in_time or not attendance.check_out_time:
+        messages.error(request, "Attendance incomplete.")
+        return redirect("attendance")
+
+    # 🔥 Prevent double payment
+    if hasattr(attendance, "salary_record"):
+        messages.warning(request, "Salary already paid for this attendance.")
+        return redirect("attendance")
+
+    total_seconds = int(
+        (attendance.check_out_time - attendance.check_in_time).total_seconds()
+    )
+
+    base_amount = Decimal(total_seconds)
+
+    bonus_input = request.POST.get("bonus")
+    bonus = Decimal(bonus_input) if bonus_input else Decimal(0)
+
+    total_amount = base_amount + bonus
+
+    Salary.objects.create(
+        operator=attendance.operator,
+        attendance=attendance,
+        base_amount=base_amount,
+        bonus=bonus,
+        total_amount=total_amount
+    )
+
+    messages.success(request, "Salary paid successfully.")
+    return redirect("attendance")
+
+
+@login_required
+def earnings_view(request):
+    if request.user.role != "operator":
+        return redirect("login")
+
+    salaries = Salary.objects.filter(operator=request.user).order_by("-paid_date")
+
+    from django.db.models import Sum
+    from django.utils.timezone import now
+
+    current_month = now().month
+    current_year = now().year
+
+    monthly_total = salaries.filter(
+        paid_date__month=current_month,
+        paid_date__year=current_year
+    ).aggregate(Sum("total_amount"))["total_amount__sum"] or 0
+
+    return render(request, "earnings.html", {
+        "salaries": salaries,
+        "monthly_total": monthly_total
+    })

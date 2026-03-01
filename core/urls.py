@@ -41,4 +41,7 @@ urlpatterns = [
 
 
     path('test-alert/', views.test_alert, name='test_alert'),
+
+    path('pay-salary/<int:attendance_id>/', views.pay_salary, name='pay_salary'),
+    path('earnings/', views.earnings_view, name='earnings'),
 ]

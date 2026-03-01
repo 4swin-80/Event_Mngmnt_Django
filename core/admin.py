@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Event, Script, Cue, Attendance, Notification, Booking, Rating, Complaint
+from .models import User, Event, Script, Cue, Attendance, Notification, Booking, Rating, Complaint, Salary
 
 
 # =========================
@@ -90,3 +90,8 @@ class RatingAdmin(admin.ModelAdmin):
 class ComplaintAdmin(admin.ModelAdmin):
     list_display = ("customer", "subject", "status", "created_at")
     list_editable = ("status",)
+
+
+@admin.register(Salary)
+class SalaryAdmin(admin.ModelAdmin):
+    list_display = ("operator", "base_amount", "bonus", "total_amount", "paid_date")    

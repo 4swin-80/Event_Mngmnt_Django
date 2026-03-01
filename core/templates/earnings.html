@@ -1,0 +1,28 @@
+<html>
+<head>
+    <title>Earnings Report</title>
+</head>
+    <body>
+        <h1>My Earnings</h1>
+
+<a href="{% url 'operator_dashboard' %}">Back</a>
+
+<hr>
+
+<h3>Monthly Total: ₹{{ monthly_total }}</h3>
+
+<hr>
+
+{% for s in salaries %}
+    <div>
+        Base: ₹{{ s.base_amount }} |
+        Bonus: ₹{{ s.bonus }} |
+        Total: ₹{{ s.total_amount }} |
+        Paid: {{ s.paid_date }}
+    </div>
+    <hr>
+{% empty %}
+    <p>No salary records.</p>
+{% endfor %}
+    </body>
+</html>

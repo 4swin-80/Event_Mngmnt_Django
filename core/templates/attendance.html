@@ -1,32 +1,168 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Attendance</title>
+    <title>Attendance & Salary Management</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 8px;
+        }
+
+        .nav-links {
+            margin-bottom: 15px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            margin-right: 10px;
+            color: #007bff;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        .top-summary {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e9f5ff;
+            border-left: 6px solid #007bff;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .record {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.06);
+        }
+
+        .record p {
+            margin: 6px 0;
+        }
+
+        .salary-box {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .btn {
+            padding: 7px 14px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #218838;
+        }
+
+        .paid {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .working {
+            color: #ff9800;
+            font-weight: bold;
+        }
+
+        input[type="number"] {
+            padding: 6px;
+            width: 130px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        hr {
+            margin: 30px 0;
+        }
+    </style>
 </head>
 <body>
 
-<h1>Attendance Records</h1>
+<h1>Attendance & Salary Management</h1>
 
-<a href="{% url 'admin_dashboard' %}">Back to Dashboard</a> |
-<a href="{% url 'logout' %}">Logout</a>
+<div class="nav-links">
+    <a href="{% url 'admin_dashboard' %}">⬅ Back to Dashboard</a>
+    <a href="{% url 'logout' %}">Logout</a>
+</div>
+
+<div class="top-summary">
+    💰 Total Salary Paid (All Operators): ₹{{ total_paid }}
+</div>
 
 <hr>
 
 {% for a in attendance %}
-    <div>
-        <strong>{{ a.operator.username }}</strong> |
-        Check-In: {{ a.check_in_time }} |
-        Check-Out: {{ a.check_out_time }} |
+    <div class="record">
+
+        <p><strong>Operator:</strong> {{ a.operator.username }}</p>
+        <p><strong>Event:</strong> {{ a.event.name }}</p>
+        <p><strong>Check-In:</strong> {{ a.check_in_time }}</p>
+        <p><strong>Check-Out:</strong> {{ a.check_out_time }}</p>
 
         {% if a.total_time %}
-            Total: {{ a.total_time }}
+            <p><strong>Total Time:</strong> {{ a.total_time }} seconds</p>
+
+            <div class="salary-box">
+
+                {% if a.salary_record %}
+                    <div class="paid">
+                        ✅ Total Salary Paid: ₹{{ a.salary_record.total_amount }}
+                    </div>
+
+                    <p>
+                        Base: ₹{{ a.salary_record.base_amount }} |
+                        Bonus: ₹{{ a.salary_record.bonus }}
+                    </p>
+
+                {% else %}
+                    <p>
+                        <strong>Base Salary (₹1/sec):</strong>
+                        ₹{{ a.calculated_salary }}
+                    </p>
+
+                    <form method="post" action="{% url 'pay_salary' a.id %}">
+                        {% csrf_token %}
+
+                        <p>
+                            Bonus (Optional ₹):
+                            <input type="number" name="bonus" step="0.01">
+                        </p>
+
+                        <button type="submit" class="btn">
+                            💰 Pay Salary
+                        </button>
+                    </form>
+                {% endif %}
+
+            </div>
+
         {% else %}
-            Working...
+            <div class="working">
+                ⏳ Working... (Not checked out yet)
+            </div>
         {% endif %}
+
     </div>
-    <hr>
+
 {% empty %}
-    <p>No attendance records.</p>
+    <p>No attendance records available.</p>
 {% endfor %}
 
 </body>
