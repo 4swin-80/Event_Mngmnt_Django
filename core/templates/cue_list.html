@@ -2,29 +2,107 @@
 <html>
 <head>
     <title>Cue List</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f6f9;
+        }
+
+        .top-links {
+            margin-bottom: 15px;
+        }
+
+        .section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .cue-card {
+            border: 1px solid #ddd;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+        }
+
+        .pending {
+            border-left: 6px solid orange;
+        }
+
+        .completed {
+            border-left: 6px solid green;
+        }
+
+        .pending-status {
+            color: orange;
+            font-weight: bold;
+        }
+
+        .completed-status {
+            color: green;
+            font-weight: bold;
+        }
+
+        hr {
+            margin: 25px 0;
+        }
+    </style>
 </head>
 <body>
 
 <h1>All Cues</h1>
 
-<a href="{% url 'admin_dashboard' %}">Back to Dashboard</a> |
-<a href="{% url 'logout' %}">Logout</a>
+<div class="top-links">
+    <a href="{% url 'admin_dashboard' %}">⬅ Back to Dashboard</a> |
+    <a href="{% url 'logout' %}">Logout</a>
+</div>
 
 <hr>
 
-{% for cue in cues %}
-    <div>
-        <strong>{{ cue.cue_action }}</strong> |
-        Event: {{ cue.event.name }} |
-        Operator: {{ cue.operator.username }} |
-        Date: {{ cue.cue_date }} |
-        Time: {{ cue.cue_time }} |
-        Status: {{ cue.cue_status }}
-    </div>
-    <hr>
-{% empty %}
-    <p>No cues available.</p>
-{% endfor %}
+<!-- 🟡 PENDING SECTION (TOP) -->
+<div class="section">
+    <h2>🟡 Pending Cues</h2>
+
+    {% for cue in pending_cues %}
+        <div class="cue-card pending">
+            <strong>{{ cue.cue_action }}</strong><br>
+            Event: {{ cue.event.name }} <br>
+            Operator: {{ cue.operator.username }} <br>
+            Date: {{ cue.cue_date }} <br>
+            Time: {{ cue.cue_time }} <br>
+            <span class="pending-status">
+                Status: {{ cue.cue_status }}
+            </span>
+        </div>
+    {% empty %}
+        <p>No pending cues.</p>
+    {% endfor %}
+</div>
+
+
+<!-- 🟢 COMPLETED SECTION (BOTTOM) -->
+<div class="section">
+    <h2>🟢 Completed Cues</h2>
+
+    {% for cue in completed_cues %}
+        <div class="cue-card completed">
+            <strong>{{ cue.cue_action }}</strong><br>
+            Event: {{ cue.event.name }} <br>
+            Operator: {{ cue.operator.username }} <br>
+            Date: {{ cue.cue_date }} <br>
+            Time: {{ cue.cue_time }} <br>
+            <span class="completed-status">
+                Status: {{ cue.cue_status }}
+            </span>
+        </div>
+    {% empty %}
+        <p>No completed cues.</p>
+    {% endfor %}
+</div>
 
 </body>
 </html>
