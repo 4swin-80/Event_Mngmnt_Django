@@ -2,21 +2,37 @@
 <html>
 <head>
     <title>Operator Dashboard</title>
+    {% load static %}
+
+    <style>
+        @keyframes blink {
+            0% {opacity:1;}
+            50% {opacity:0;}
+            100% {opacity:1;}
+        }
+
+        .alert {
+            color: red;
+            font-size: 24px;
+            animation: blink 1s infinite;
+        }
+    </style>
 </head>
 <body>
 
-{% load static %}
-
 <h1>Operator Dashboard</h1>
 
-<p>Welcome {{ user.username }} |
-<a href="{% url 'logout' %}">Logout</a></p>
+<p>
+    Welcome {{ user.username }} |
+    <a href="{% url 'logout' %}">Logout</a>
+</p>
 
 <hr>
-<h3>Attendance</h3>
 
+<h3>Attendance</h3>
 <a href="{% url 'check_in' %}">🟢 Check In</a>
 <a href="{% url 'check_out' %}">🔴 Check Out</a>
+
 <hr>
 
 <h3>Pending Cues</h3>
@@ -33,64 +49,79 @@
 
 <hr>
 
+<button onclick="sendTestAlert()">Test Alert</button>
+
 <h3>Live Alerts</h3>
 <div id="alerts"></div>
 
-<audio id="alertSound" preload="auto">
-    <source src="{% static 'audio/smooth_notification.mp3' %}" type="audio/mpeg">
-</audio>
-
 <script>
-    const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-    const socket = new WebSocket(
-        protocol + window.location.host + "/ws/alerts/"
-    );
-    
-    socket.onopen = function() {
-        console.log("WebSocket connected ✅");
-    };
-    
-    socket.onerror = function(e) {
-        console.log("WebSocket error ❌", e);
-    };
-    
-    socket.onclose = function() {
-        console.log("WebSocket closed");
-    };
+const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+const socket = new WebSocket(protocol + window.location.host + "/ws/alerts/");
 
-// Unlock autoplay
-document.body.addEventListener('click', function() {
-    const sound = document.getElementById("alertSound");
-    sound.play().then(() => {
-        sound.pause();
-        sound.currentTime = 0;
-    }).catch(() => {});
-}, { once: true });
+const soundUrl = "{% static 'audio/smooth_notification.mp3' %}";
+let audioUnlocked = false;
 
+// Create reusable audio object
+const audio = new Audio(soundUrl);
+audio.preload = "auto";
+
+// Unlock audio on first user click
+document.addEventListener("click", function unlock() {
+    audio.play()
+        .then(() => {
+            audio.pause();
+            audio.currentTime = 0;
+            audioUnlocked = true;
+            console.log("🔓 Audio unlocked");
+        })
+        .catch(err => console.log("Unlock failed:", err));
+
+    document.removeEventListener("click", unlock);
+});
+
+// Play sound safely
+function playSound() {
+    if (!audioUnlocked) {
+        console.log("Audio not unlocked yet");
+        return;
+    }
+
+    audio.currentTime = 0;
+    audio.play().catch(err => console.log("Play blocked:", err));
+}
+
+// AJAX Test Alert (no page reload)
+function sendTestAlert() {
+    fetch("{% url 'test_alert' %}")
+        .then(response => response.json())
+        .then(data => console.log("Test alert sent"));
+}
+
+// When WebSocket receives alert
 socket.onmessage = function(e) {
     const data = JSON.parse(e.data);
 
     const alertDiv = document.createElement("div");
+    alertDiv.className = "alert";
     alertDiv.innerHTML = data.message;
-    alertDiv.style.color = "red";
-    alertDiv.style.fontSize = "24px";
-    alertDiv.style.animation = "blink 1s infinite";
 
     document.getElementById("alerts").appendChild(alertDiv);
 
-    const sound = document.getElementById("alertSound");
-    sound.currentTime = 0;
-    sound.play();
+    playSound();
+};
+
+socket.onopen = function() {
+    console.log("WebSocket connected ✅");
+};
+
+socket.onerror = function(e) {
+    console.log("WebSocket error ❌", e);
+};
+
+socket.onclose = function() {
+    console.log("WebSocket disconnected");
 };
 </script>
-
-<style>
-@keyframes blink {
-    0% {opacity:1;}
-    50% {opacity:0;}
-    100% {opacity:1;}
-}
-</style>
 
 </body>
 </html>

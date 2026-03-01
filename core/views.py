@@ -565,3 +565,23 @@ def check_out(request):
         messages.error(request, "You are not checked in.")
 
     return redirect("operator_dashboard")
+
+
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
+from django.http import JsonResponse
+
+@login_required
+def test_alert(request):
+    channel_layer = get_channel_layer()
+
+    async_to_sync(channel_layer.group_send)(
+        f"user_{request.user.id}",
+        {
+            "type": "send_alert",
+            "message": "🚨 TEST ALERT!"
+        }
+    )
+
+    return JsonResponse({"status": "sent"})
