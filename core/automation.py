@@ -12,15 +12,8 @@ def check_and_trigger_cues():
 
     for cue in cues:
 
-        booking = cue.event.bookings.filter(
-            event_date__isnull=False
-        ).order_by("-event_date").first()
-
-        if not booking:
-            continue
-
         cue_datetime = datetime.combine(
-            booking.event_date,
+            cue.cue_date,
             cue.cue_time
         )
 

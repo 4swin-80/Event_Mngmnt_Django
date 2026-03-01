@@ -52,8 +52,8 @@ class ScriptAdmin(admin.ModelAdmin):
 # =========================
 @admin.register(Cue)
 class CueAdmin(admin.ModelAdmin):
-    list_display = ("cue_action", "event", "operator", "cue_time", "cue_status")
-    list_filter = ("cue_status", "cue_type")
+    list_display = ("cue_action", "event", "operator", "cue_date", "cue_time", "cue_status")
+    list_filter = ("cue_status",)
     search_fields = ("cue_action",)
 
 
