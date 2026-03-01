@@ -384,8 +384,14 @@ def cue_list(request):
     if request.user.role != "admin":
         return redirect("login")
 
-    pending_cues = Cue.objects.filter(cue_status="Pending").order_by("cue_date", "cue_time")
-    completed_cues = Cue.objects.filter(cue_status="Completed").order_by("-cue_date", "-cue_time")
+    # 🔥 Latest first (newest on top)
+    pending_cues = Cue.objects.filter(
+        cue_status="Pending"
+    ).order_by("-cue_date", "-cue_time")
+
+    completed_cues = Cue.objects.filter(
+        cue_status="Completed"
+    ).order_by("-cue_date", "-cue_time")
 
     return render(request, "cue_list.html", {
         "pending_cues": pending_cues,
