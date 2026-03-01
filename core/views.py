@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from datetime import timedelta
 from .models import Event, Cue, Notification, Attendance, Booking, Rating, Complaint, Salary
-from .forms import EventForm, CueForm, RatingForm, ComplaintForm, AdminReplyForm, BookingForm
+from .forms import EventForm, CueForm, RatingForm, ComplaintForm, AdminReplyForm, BookingForm, CustomerRegisterForm
 
 
 
@@ -688,3 +688,21 @@ def earnings_view(request):
         "salaries": salaries,
         "monthly_total": monthly_total
     })
+
+
+
+
+def register_view(request):
+    if request.user.is_authenticated:
+        return redirect("customer_dashboard")
+
+    if request.method == "POST":
+        form = CustomerRegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # auto login
+            return redirect("customer_dashboard")
+    else:
+        form = CustomerRegisterForm()
+
+    return render(request, "register.html", {"form": form})

@@ -44,4 +44,6 @@ urlpatterns = [
 
     path('pay-salary/<int:attendance_id>/', views.pay_salary, name='pay_salary'),
     path('earnings/', views.earnings_view, name='earnings'),
+
+    path('register/', views.register_view, name='register'),
 ]

@@ -1,6 +1,7 @@
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django import forms
 from .models import Event, Cue, Rating, Complaint, Booking, User
+
 
 
 class BookingForm(forms.ModelForm):
@@ -84,4 +85,18 @@ class ComplaintForm(forms.ModelForm):
 class AdminReplyForm(forms.ModelForm):
     class Meta:
         model = Complaint
-        fields = ['admin_reply']      
+        fields = ['admin_reply']   
+
+
+
+class CustomerRegisterForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ["username", "email", "password1", "password2"]
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.role = "customer"  # 🔥 force role
+        if commit:
+            user.save()
+        return user
