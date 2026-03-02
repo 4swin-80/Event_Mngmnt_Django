@@ -9,6 +9,7 @@ from decimal import Decimal
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from datetime import timedelta
+from django.http import JsonResponse
 from .models import Event, Cue, Notification, Attendance, Booking, Rating, Complaint, Salary, User
 from .forms import EventForm, CueForm, RatingForm, ComplaintForm, AdminReplyForm, BookingForm, CustomerRegisterForm
 
@@ -715,34 +716,41 @@ def register_view(request):
     return render(request, "register.html", {"form": form})
 
 
+
 @login_required
 def update_user_role(request, user_id):
     if request.user.role != "admin":
-        return redirect("login")
+        return JsonResponse({"error": "Unauthorized"}, status=403)
 
     user_obj = get_object_or_404(User, id=user_id)
+
+    # 🔥 Prevent admin from modifying their own role
+    if user_obj == request.user:
+        return JsonResponse({
+            "error": "You cannot change your own role."
+        }, status=400)
 
     if request.method == "POST":
         new_role = request.POST.get("role")
         new_operator_role = request.POST.get("operator_role")
 
-        # 🔥 Handle "none" role
-        if new_role == "none":
-            user_obj.role = None
-            user_obj.operator_role = None
-        else:
+        if new_role != "none":
             user_obj.role = new_role
 
-            # 🔥 Handle operator role
             if new_role == "operator":
-                if new_operator_role == "none":
-                    user_obj.operator_role = None
-                else:
-                    user_obj.operator_role = new_operator_role
+                user_obj.operator_role = (
+                    None if new_operator_role == "none"
+                    else new_operator_role
+                )
             else:
                 user_obj.operator_role = None
 
         user_obj.save()
 
-        messages.success(request, "User updated successfully.")
-        return redirect("admin_dashboard")
+        return JsonResponse({
+            "success": True,
+            "new_role": user_obj.role,
+            "new_operator_role": user_obj.operator_role
+        })
+
+    return JsonResponse({"error": "Invalid request"}, status=400)

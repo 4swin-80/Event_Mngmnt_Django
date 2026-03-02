@@ -64,6 +64,21 @@
             border: none;
             border-radius: 4px;
         }
+
+
+        
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+            
+        .badge-admin { background: #dc3545; }     /* Red */
+        .badge-operator { background: #007bff; }  /* Blue */
+        .badge-customer { background: #28a745; }  /* Green */
+        
     </style>
 
 </head>
@@ -121,168 +136,199 @@ Welcome {{ user.username }} |
 <!-- ================= ADMIN USERS ================= -->
 <div class="account-box">
     <h3>Admin Accounts</h3>
-    {% for user in admins %}
-        <div class="account-card">
-            <strong>{{ user.username }}</strong>
 
-            <form method="post" action="{% url 'update_user_role' user.id %}">
-                {% csrf_token %}
-                <select name="role">
-                    <option value="none" {% if not user.role %}selected{% endif %}>None</option>
-                
-                    <option value="admin"
-                        {% if user.role == "admin" %}selected{% endif %}>
-                        Admin
-                    </option>
-                
-                    <option value="operator"
-                        {% if user.role == "operator" %}selected{% endif %}>
-                        Operator
-                    </option>
-                
-                    <option value="customer"
-                        {% if user.role == "customer" %}selected{% endif %}>
-                        Customer
-                    </option>
-                </select>
+    {% for user in admins %}
+    <div class="account-card">
+
+        <strong>{{ user.username }}</strong>
+
+        <span class="badge badge-admin">Admin</span>
+
+        <form class="role-form" data-user-id="{{ user.id }}">
+            {% csrf_token %}
+
+            <!-- Role Select -->
+            <select name="role">
+                <option value="admin" {% if user.role == "admin" %}selected{% endif %}>Admin</option>
+                <option value="operator" {% if user.role == "operator" %}selected{% endif %}>Operator</option>
+                <option value="customer" {% if user.role == "customer" %}selected{% endif %}>Customer</option>
+            </select>
+
+            <!-- 🔥 Operator Role (Wrapped + Hidden by default if not operator) -->
+            <div class="operator-role-wrapper"
+                 {% if user.role != "operator" %}style="display:none;"{% endif %}>
 
                 <select name="operator_role">
-                    <option value="none" {% if not user.operator_role %}selected{% endif %}>
-                        None
-                    </option>
-                
-                    <option value="lighting"
-                        {% if user.operator_role == "lighting" %}selected{% endif %}>
-                        Lighting
-                    </option>
-                
-                    <option value="sound"
-                        {% if user.operator_role == "sound" %}selected{% endif %}>
-                        Sound
-                    </option>
-                
-                    <option value="stage"
-                        {% if user.operator_role == "stage" %}selected{% endif %}>
-                        Stage
-                    </option>
+                    <option value="none" {% if not user.operator_role %}selected{% endif %}>None</option>
+                    <option value="lighting" {% if user.operator_role == "lighting" %}selected{% endif %}>Lighting</option>
+                    <option value="sound" {% if user.operator_role == "sound" %}selected{% endif %}>Sound</option>
+                    <option value="stage" {% if user.operator_role == "stage" %}selected{% endif %}>Stage</option>
                 </select>
 
-                <button class="update-btn">Update</button>
-            </form>
-        </div>
+            </div>
+
+            <button type="submit"
+                class="update-btn"
+                {% if user.id == request.user.id %}disabled{% endif %}>
+                Update
+            </button>
+        </form>
+    </div>
     {% endfor %}
 </div>
+
+
 
 <!-- ================= OPERATOR USERS ================= -->
 <div class="account-box">
     <h3>Operator Accounts</h3>
-    {% for user in operators %}
-        <div class="account-card">
-            <strong>{{ user.username }}</strong>
-            ({{ user.operator_role }})
 
-            <form method="post" action="{% url 'update_user_role' user.id %}">
-                {% csrf_token %}
-                <select name="role">
-                    <option value="none" {% if not user.role %}selected{% endif %}>None</option>
-                
-                    <option value="admin"
-                        {% if user.role == "admin" %}selected{% endif %}>
-                        Admin
-                    </option>
-                
-                    <option value="operator"
-                        {% if user.role == "operator" %}selected{% endif %}>
-                        Operator
-                    </option>
-                
-                    <option value="customer"
-                        {% if user.role == "customer" %}selected{% endif %}>
-                        Customer
-                    </option>
-                </select>
+    {% for user in operators %}
+    <div class="account-card">
+
+        <strong>{{ user.username }}</strong>
+
+        <span class="badge badge-operator">Operator</span>
+
+        <form class="role-form" data-user-id="{{ user.id }}">
+            {% csrf_token %}
+
+            <select name="role">
+                <option value="admin" {% if user.role == "admin" %}selected{% endif %}>Admin</option>
+                <option value="operator" {% if user.role == "operator" %}selected{% endif %}>Operator</option>
+                <option value="customer" {% if user.role == "customer" %}selected{% endif %}>Customer</option>
+            </select>
+
+            <div class="operator-role-wrapper"
+                 {% if user.role != "operator" %}style="display:none;"{% endif %}>
 
                 <select name="operator_role">
-                    <option value="none" {% if not user.operator_role %}selected{% endif %}>
-                        None
-                    </option>
-                
-                    <option value="lighting"
-                        {% if user.operator_role == "lighting" %}selected{% endif %}>
-                        Lighting
-                    </option>
-                
-                    <option value="sound"
-                        {% if user.operator_role == "sound" %}selected{% endif %}>
-                        Sound
-                    </option>
-                
-                    <option value="stage"
-                        {% if user.operator_role == "stage" %}selected{% endif %}>
-                        Stage
-                    </option>
+                    <option value="none" {% if not user.operator_role %}selected{% endif %}>None</option>
+                    <option value="lighting" {% if user.operator_role == "lighting" %}selected{% endif %}>Lighting</option>
+                    <option value="sound" {% if user.operator_role == "sound" %}selected{% endif %}>Sound</option>
+                    <option value="stage" {% if user.operator_role == "stage" %}selected{% endif %}>Stage</option>
                 </select>
 
-                <button class="update-btn">Update</button>
-            </form>
-        </div>
+            </div>
+
+            <button type="submit" class="update-btn">Update</button>
+        </form>
+    </div>
     {% endfor %}
 </div>
+
+
 
 <!-- ================= CUSTOMER USERS ================= -->
 <div class="account-box">
     <h3>Customer Accounts</h3>
-    {% for user in customers %}
-        <div class="account-card">
-            <strong>{{ user.username }}</strong>
 
-            <form method="post" action="{% url 'update_user_role' user.id %}">
-                {% csrf_token %}
-                <select name="role">
-                    <option value="none" {% if not user.role %}selected{% endif %}>None</option>
-                
-                    <option value="admin"
-                        {% if user.role == "admin" %}selected{% endif %}>
-                        Admin
-                    </option>
-                
-                    <option value="operator"
-                        {% if user.role == "operator" %}selected{% endif %}>
-                        Operator
-                    </option>
-                
-                    <option value="customer"
-                        {% if user.role == "customer" %}selected{% endif %}>
-                        Customer
-                    </option>
-                </select>
+    {% for user in customers %}
+    <div class="account-card">
+
+        <strong>{{ user.username }}</strong>
+
+        <span class="badge badge-customer">Customer</span>
+
+        <form class="role-form" data-user-id="{{ user.id }}">
+            {% csrf_token %}
+
+            <select name="role">
+                <option value="admin" {% if user.role == "admin" %}selected{% endif %}>Admin</option>
+                <option value="operator" {% if user.role == "operator" %}selected{% endif %}>Operator</option>
+                <option value="customer" {% if user.role == "customer" %}selected{% endif %}>Customer</option>
+            </select>
+
+            <div class="operator-role-wrapper"
+                 {% if user.role != "operator" %}style="display:none;"{% endif %}>
 
                 <select name="operator_role">
-                    <option value="none" {% if not user.operator_role %}selected{% endif %}>
-                        None
-                    </option>
-                
-                    <option value="lighting"
-                        {% if user.operator_role == "lighting" %}selected{% endif %}>
-                        Lighting
-                    </option>
-                
-                    <option value="sound"
-                        {% if user.operator_role == "sound" %}selected{% endif %}>
-                        Sound
-                    </option>
-                
-                    <option value="stage"
-                        {% if user.operator_role == "stage" %}selected{% endif %}>
-                        Stage
-                    </option>
+                    <option value="none" {% if not user.operator_role %}selected{% endif %}>None</option>
+                    <option value="lighting" {% if user.operator_role == "lighting" %}selected{% endif %}>Lighting</option>
+                    <option value="sound" {% if user.operator_role == "sound" %}selected{% endif %}>Sound</option>
+                    <option value="stage" {% if user.operator_role == "stage" %}selected{% endif %}>Stage</option>
                 </select>
 
-                <button class="update-btn">Update</button>
-            </form>
-        </div>
+            </div>
+
+            <button type="submit" class="update-btn">Update</button>
+        </form>
+    </div>
     {% endfor %}
 </div>
+
+
+
+<script>
+document.querySelectorAll(".role-form").forEach(form => {
+
+    const roleSelect = form.querySelector("select[name='role']");
+    const operatorWrapper = form.querySelector(".operator-role-wrapper");
+
+    /* 🔥 Show/Hide on page load */
+    if (roleSelect.value === "operator") {
+        operatorWrapper.style.display = "inline-block";
+    } else {
+        operatorWrapper.style.display = "none";
+    }
+
+    /* 🔥 Show/Hide on role change */
+    roleSelect.addEventListener("change", function() {
+        if (this.value === "operator") {
+            operatorWrapper.style.display = "inline-block";
+        } else {
+            operatorWrapper.style.display = "none";
+            const operatorSelect = form.querySelector("select[name='operator_role']");
+            if (operatorSelect) {
+                operatorSelect.value = "none";
+            }
+        }
+    });
+
+    /* 🔥 AJAX Submit */
+    form.addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const userId = this.dataset.userId;
+        const formData = new FormData(this);
+
+        fetch(`/update-user-role/${userId}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": formData.get("csrfmiddlewaretoken")
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            if (data.success) {
+
+                const badge = this.parentElement.querySelector(".badge");
+
+                badge.textContent = data.new_role.charAt(0).toUpperCase() + data.new_role.slice(1);
+                badge.className = "badge";
+
+                if (data.new_role === "admin") {
+                    badge.classList.add("badge-admin");
+                } else if (data.new_role === "operator") {
+                    badge.classList.add("badge-operator");
+                } else {
+                    badge.classList.add("badge-customer");
+                }
+
+                alert("Role updated successfully!");
+            }
+        });
+    });
+
+});
+</script>
 
 </body>
 </html>
