@@ -39,10 +39,23 @@
 <h3>Pending Cues</h3>
 
 {% for cue in cues %}
-    <div>
+    <div style="margin-bottom:15px; padding:10px; border:1px solid #ddd; border-radius:6px;">
+        
         <strong>{{ cue.cue_action }}</strong>
         ({{ cue.cue_time }})
-        <a href="{% url 'complete_cue' cue.id %}">✅ Mark Completed</a>
+        <br>
+
+        {% if cue.note %}
+            <small style="color:#555;">
+                📝 <strong>Note:</strong> {{ cue.note }}
+            </small>
+            <br>
+        {% endif %}
+
+        <a href="{% url 'complete_cue' cue.id %}">
+            ✅ Mark Completed
+        </a>
+
     </div>
 {% empty %}
     <p>No pending cues.</p>

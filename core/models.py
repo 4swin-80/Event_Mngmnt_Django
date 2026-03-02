@@ -131,9 +131,13 @@ class Cue(models.Model):
         on_delete=models.CASCADE,
         related_name='assigned_cues'
     )
-    cue_date = models.DateField()   # 🔥 NEW FIELD
+    cue_date = models.DateField()
     cue_time = models.TimeField()
     cue_action = models.CharField(max_length=100)
+
+    # 🔥 NEW FIELD
+    note = models.TextField(blank=True, null=True)
+
     pre_alert_sec = models.IntegerField(default=0)
     cue_status = models.CharField(
         max_length=30,

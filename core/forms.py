@@ -25,14 +25,16 @@ class CueForm(forms.ModelForm):
         fields = [
             'event',
             'operator',
-            'cue_date', 
+            'cue_date',
             'cue_time',
             'cue_action',
+            'note',          
             'pre_alert_sec'
         ]
         widgets = {
             'cue_date': forms.DateInput(attrs={'type': 'date'}),
-            'cue_time': forms.TimeInput(attrs={'type': 'time'})
+            'cue_time': forms.TimeInput(attrs={'type': 'time'}),
+            'note': forms.Textarea(attrs={'rows': 3})
         }
 
     def __init__(self, *args, **kwargs):
