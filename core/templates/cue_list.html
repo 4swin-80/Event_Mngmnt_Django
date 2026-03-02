@@ -1,108 +1,175 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Cue List</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
         body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background-color: #f4f6f9;
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f7;
         }
 
-        .top-links {
-            margin-bottom: 15px;
+        .navbar {
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
-        .section {
+        .section-card {
             background: white;
-            padding: 20px;
-            margin-bottom: 30px;
-            border-radius: 10px;
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.08);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+            margin-bottom: 40px;
         }
 
         .cue-card {
-            border: 1px solid #ddd;
-            padding: 12px;
-            margin-bottom: 12px;
-            border-radius: 6px;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
         }
 
         .pending {
-            border-left: 6px solid orange;
+            border-left: 6px solid #ffc107;
+            background: #fff8e1;
         }
 
         .completed {
-            border-left: 6px solid green;
+            border-left: 6px solid #198754;
+            background: #eafaf1;
         }
 
-        .pending-status {
-            color: orange;
-            font-weight: bold;
+        .status-pending {
+            color: #ffc107;
+            font-weight: 600;
         }
 
-        .completed-status {
-            color: green;
-            font-weight: bold;
+        .status-completed {
+            color: #198754;
+            font-weight: 600;
         }
 
-        hr {
-            margin: 25px 0;
+        .btn-rounded {
+            border-radius: 25px;
+            padding: 6px 18px;
         }
     </style>
 </head>
 <body>
 
-<h1>All Cues</h1>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container-fluid px-4">
+        <span class="navbar-brand fw-semibold">NexEvent</span>
 
-<div class="top-links">
-    <a href="{% url 'admin_dashboard' %}">⬅ Back to Dashboard</a> |
-    <a href="{% url 'logout' %}">Logout</a>
-</div>
-
-<hr>
-
-<!-- 🟡 PENDING SECTION (TOP) -->
-<div class="section">
-    <h2>🟡 Pending Cues</h2>
-
-    {% for cue in pending_cues %}
-        <div class="cue-card pending">
-            <strong>{{ cue.cue_action }}</strong><br>
-            Event: {{ cue.event.name }} <br>
-            Operator: {{ cue.operator.username }} <br>
-            Date: {{ cue.cue_date }} <br>
-            Time: {{ cue.cue_time }} <br>
-            <span class="pending-status">
-                Status: {{ cue.cue_status }}
-            </span>
+        <div class="d-flex gap-3">
+            <a href="{% url 'admin_dashboard' %}" class="text-decoration-none">
+                Dashboard
+            </a>
+            <a href="{% url 'logout' %}" class="text-danger text-decoration-none">
+                Logout
+            </a>
         </div>
-    {% empty %}
-        <p>No pending cues.</p>
-    {% endfor %}
-</div>
+    </div>
+</nav>
 
+<div class="container-fluid px-4 mt-4 mb-5">
 
-<!-- 🟢 COMPLETED SECTION (BOTTOM) -->
-<div class="section">
-    <h2>🟢 Completed Cues</h2>
+    <h4 class="mb-4 text-center">All Cues</h4>
+    <hr>
+    <br>
 
-    {% for cue in completed_cues %}
-        <div class="cue-card completed">
-            <strong>{{ cue.cue_action }}</strong><br>
-            Event: {{ cue.event.name }} <br>
-            Operator: {{ cue.operator.username }} <br>
-            Date: {{ cue.cue_date }} <br>
-            Time: {{ cue.cue_time }} <br>
-            <span class="completed-status">
-                Status: {{ cue.cue_status }}
-            </span>
+    <!-- 🟡 Pending Cues -->
+    <div class="section-card">
+
+        <h5 class="mb-4">🟡 Pending Cues</h5>
+
+        <div class="row">
+            {% for cue in pending_cues %}
+            <div class="col-lg-4 col-md-6">
+                <div class="cue-card pending">
+                    <strong>{{ cue.cue_action }}</strong>
+
+                    <p class="mb-1">
+                        <strong>Event:</strong> {{ cue.event.name }}
+                    </p>
+
+                    <p class="mb-1">
+                        <strong>Operator:</strong> {{ cue.operator.username }}
+                    </p>
+
+                    <p class="mb-1">
+                        <strong>Date:</strong> {{ cue.cue_date }}
+                    </p>
+
+                    <p class="mb-2">
+                        <strong>Time:</strong> {{ cue.cue_time }}
+                    </p>
+
+                    <div class="status-pending">
+                        Status: {{ cue.cue_status }}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+                <p>No pending cues.</p>
+            {% endfor %}
         </div>
-    {% empty %}
-        <p>No completed cues.</p>
-    {% endfor %}
+
+    </div>
+    <hr>
+    <br>
+
+    <!-- 🟢 Completed Cues -->
+    <div class="section-card">
+
+        <h5 class="mb-4">🟢 Completed Cues</h5>
+
+        <div class="row">
+            {% for cue in completed_cues %}
+            <div class="col-lg-4 col-md-6">
+                <div class="cue-card completed">
+                    <strong>{{ cue.cue_action }}</strong>
+
+                    <p class="mb-1">
+                        <strong>Event:</strong> {{ cue.event.name }}
+                    </p>
+
+                    <p class="mb-1">
+                        <strong>Operator:</strong> {{ cue.operator.username }}
+                    </p>
+
+                    <p class="mb-1">
+                        <strong>Date:</strong> {{ cue.cue_date }}
+                    </p>
+
+                    <p class="mb-2">
+                        <strong>Time:</strong> {{ cue.cue_time }}
+                    </p>
+
+                    <div class="status-completed">
+                        Status: {{ cue.cue_status }}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+                <p>No completed cues.</p>
+            {% endfor %}
+        </div>
+
+    </div>
+
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

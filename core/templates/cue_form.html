@@ -1,38 +1,130 @@
-<h2>Create Cue</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Cue</title>
 
-<a href="{% url 'admin_dashboard' %}">Back to Dashboard</a>
-<hr>
-<br>
-<form method="post">
-    {% csrf_token %}
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    {{ form.event.label_tag }}
-    {{ form.event }}
-    <br><br>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-    {{ form.operator.label_tag }}
-    {{ form.operator }}
-    <br><br>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f7;
+        }
 
-    {{ form.cue_time.label_tag }}
-    {{ form.cue_time }}
-    <br><br>
+        .navbar {
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
 
-    {{ form.cue_action.label_tag }}
-    {{ form.cue_action }}
-    <br><br>
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+        }
 
-    {{ form.note.label_tag }}
-    {{ form.note }}
-    <br><br>
+        .form-label {
+            font-weight: 500;
+        }
 
-    {{ form.cue_date.label_tag }}
-    {{ form.cue_date }}
-    <br><br>
+        input, select, textarea {
+            border-radius: 12px !important;
+        }
 
-    {{ form.pre_alert_sec.label_tag }}
-    {{ form.pre_alert_sec }}
-    <br><br>
+        .btn-rounded {
+            border-radius: 25px;
+            padding: 8px 22px;
+        }
+    </style>
+</head>
+<body>
 
-    <button type="submit">Save Cue</button>
-</form>
+<!-- Admin Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container-fluid px-4">
+        <span class="navbar-brand fw-semibold">Admin Panel</span>
+
+        <div class="d-flex gap-3">
+            <a href="{% url 'admin_dashboard' %}" class="text-decoration-none">
+                Dashboard
+            </a>
+            <a href="{% url 'logout' %}" class="text-danger text-decoration-none">
+                Logout
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5 mb-5">
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+
+            <div class="form-card">
+
+                <h4 class="mb-4 text-center">Create Cue</h4>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        {{ form.event.label_tag }}
+                        {{ form.event }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.operator.label_tag }}
+                        {{ form.operator }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.cue_time.label_tag }}
+                        {{ form.cue_time }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.cue_action.label_tag }}
+                        {{ form.cue_action }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.note.label_tag }}
+                        {{ form.note }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.cue_date.label_tag }}
+                        {{ form.cue_date }}
+                    </div>
+
+                    <div class="mb-4">
+                        {{ form.pre_alert_sec.label_tag }}
+                        {{ form.pre_alert_sec }}
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit"
+                                class="btn btn-dark btn-rounded">
+                            Save Cue
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
