@@ -807,16 +807,21 @@ def chat_view(request):
     if request.user.role not in ["admin", "operator"]:
         return redirect("login")
 
-    # 🔥 Determine opposite role user list
+    # 🔥 Determine opposite users
     if request.user.role == "admin":
         users = User.objects.filter(role="operator")
     else:
         users = User.objects.filter(role="admin")
 
     selected_user_id = request.GET.get("user")
-
-    messages = []
     selected_user = None
+    messages = []
+
+    # 🔥 Get unread senders list (who sent unseen messages)
+    unread_senders = ChatMessage.objects.filter(
+        receiver=request.user,
+        is_seen=False
+    ).values_list("sender_id", flat=True).distinct()
 
     if selected_user_id:
         selected_user = get_object_or_404(User, id=selected_user_id)
@@ -826,7 +831,7 @@ def chat_view(request):
             receiver__in=[request.user, selected_user]
         ).order_by("created_at")
 
-        # 🔥 Mark as seen
+        # 🔥 Mark messages as seen
         ChatMessage.objects.filter(
             sender=selected_user,
             receiver=request.user,
@@ -836,7 +841,8 @@ def chat_view(request):
     return render(request, "chat.html", {
         "users": users,
         "messages": messages,
-        "selected_user": selected_user
+        "selected_user": selected_user,
+        "unread_senders": unread_senders
     })
 
 

@@ -31,6 +31,42 @@
         .received {
             background: #f1f1f1;
         }
+        .red-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: red;
+            border-radius: 50%;
+            margin-left: 6px;
+        }
+        .message {
+            margin-bottom: 12px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            max-width: 60%;
+        }
+        
+        .sent {
+            background: #d1f7d6;
+            margin-left: auto;
+            text-align: right;
+        }
+        
+        .received {
+            background: #f1f1f1;
+            margin-right: auto;
+            text-align: left;
+        }
+        
+        .msg-text {
+            font-size: 14px;
+        }
+        
+        .msg-time {
+            font-size: 11px;
+            color: #777;
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body>
@@ -42,7 +78,13 @@
 
     {% for u in users %}
         <p>
-            <a href="?user={{ u.id }}">{{ u.username }}</a>
+            <a href="?user={{ u.id }}" style="text-decoration:none; color:black;">
+                {{ u.username }}
+
+                {% if u.id in unread_senders %}
+                    <span class="red-dot"></span>
+                {% endif %}
+            </a>
         </p>
     {% endfor %}
 </div>
@@ -55,7 +97,15 @@
         <div>
             {% for msg in messages %}
                 <div class="message {% if msg.sender == request.user %}sent{% else %}received{% endif %}">
-                    {{ msg.message }}
+        
+                    <div class="msg-text">
+                        {{ msg.message }}
+                    </div>
+
+                    <div class="msg-time">
+                        {{ msg.created_at|date:"d M Y, h:i A" }}
+                    </div>
+
                 </div>
             {% empty %}
                 <p>No messages yet.</p>
