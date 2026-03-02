@@ -50,8 +50,6 @@
 
 <hr>
 
-<button onclick="sendTestAlert()">Test Alert</button>
-
 <h3>Live Alerts</h3>
 <div id="alerts"></div>
 
@@ -91,12 +89,6 @@ function playSound() {
     audio.play().catch(err => console.log("Play blocked:", err));
 }
 
-// AJAX Test Alert (no page reload)
-function sendTestAlert() {
-    fetch("{% url 'test_alert' %}")
-        .then(response => response.json())
-        .then(data => console.log("Test alert sent"));
-}
 
 // When WebSocket receives alert
 socket.onmessage = function(e) {
