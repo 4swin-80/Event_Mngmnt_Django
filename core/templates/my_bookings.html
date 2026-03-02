@@ -2,32 +2,230 @@
 <html>
 <head>
     <title>My Bookings</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f5f6fa;
+        }
+
+        .top-bar {
+            padding: 15px 30px;
+            background: #007bff;
+            color: white;
+        }
+
+        .top-bar a {
+            color: white;
+            margin-right: 20px;
+            text-decoration: none;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            position: relative;
+        }
+
+        .card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .card-content {
+            padding: 15px;
+        }
+
+        .card h4 {
+            margin: 0 0 8px 0;
+        }
+
+        .price {
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        /* 🔥 Booked Badge */
+        .badge-booked {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .cancel-btn {
+            display: inline-block;
+            padding: 7px 12px;
+            background-color: red;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .cancel-btn:hover {
+            background-color: darkred;
+        }
+
+        /* 🔥 Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            width: 320px;
+            margin: 15% auto;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .modal-buttons button {
+            margin: 8px;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .confirm-btn {
+            background: red;
+            color: white;
+        }
+
+        .cancel-modal-btn {
+            background: gray;
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .card-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .card-container {
+                grid-template-columns: repeat(1, 1fr);
+            }
+        }
+    </style>
 </head>
 <body>
 
-<h2>My Booked Events</h2>
+<div class="top-bar">
+    <h2>My Booked Events</h2>
+    <a href="{% url 'customer_dashboard' %}">Back</a>
+    <a href="{% url 'logout' %}">Logout</a>
+</div>
 
-<a href="{% url 'customer_dashboard' %}">Back</a> |
-<a href="{% url 'logout' %}">Logout</a>
+<div class="container">
 
-<hr>
+<div class="card-container">
 
 {% for booking in bookings %}
-    <div>
-        <strong>{{ booking.event.name }}</strong>
-        <p>Date: {{ booking.event.date }}</p>
-        <p>Location: {{ booking.event.location }}</p>
-        <p>Booked On: {{ booking.booking_date }}</p>
+<div class="card">
 
-        <!-- 🔥 Cancel Button -->
-        <a href="{% url 'cancel_booking' booking.id %}">
+    <!-- 🔥 Booked Badge -->
+    <div class="badge-booked">Booked</div>
+
+    {% if booking.event.image %}
+        <img src="{{ booking.event.image.url }}">
+    {% else %}
+        <img src="https://via.placeholder.com/400x200?text=No+Image">
+    {% endif %}
+
+    <div class="card-content">
+
+        <h4>{{ booking.event.name }}</h4>
+
+        <p><strong>Event Date:</strong> {{ booking.event_date }}</p>
+
+        <p><strong>Location:</strong> {{ booking.location }}</p>
+
+        <p><strong>Booked On:</strong> {{ booking.booking_date|date:"M d, Y" }}</p>
+
+        <p class="price">₹{{ booking.event.price }}</p>
+
+        <!-- 🔥 Cancel Button triggers modal -->
+        <button class="cancel-btn"
+                onclick="openModal({{ booking.id }})">
             Cancel Booking
-        </a>
+        </button>
+
     </div>
-    <hr>
+</div>
 {% empty %}
     <p>You have not booked any events.</p>
 {% endfor %}
+
+</div>
+</div>
+
+
+<!-- 🔥 Confirmation Modal -->
+<div id="cancelModal" class="modal">
+    <div class="modal-content">
+        <p>Are you sure you want to cancel this booking?</p>
+
+        <div class="modal-buttons">
+            <button id="confirmCancel" class="confirm-btn">
+                Yes, Cancel
+            </button>
+
+            <button onclick="closeModal()" class="cancel-modal-btn">
+                Keep Booking
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+let cancelUrl = "";
+
+function openModal(bookingId) {
+    cancelUrl = "/cancel-booking/" + bookingId + "/";
+    document.getElementById("cancelModal").style.display = "block";
+}
+
+function closeModal() {
+    document.getElementById("cancelModal").style.display = "none";
+}
+
+document.getElementById("confirmCancel").addEventListener("click", function() {
+    window.location.href = cancelUrl;
+});
+</script>
 
 </body>
 </html>
