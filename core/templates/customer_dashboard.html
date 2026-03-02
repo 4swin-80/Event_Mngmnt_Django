@@ -1,283 +1,223 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Customer Dashboard</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Font (Apple-like clean font) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background-color: #f5f6fa;
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f7;
         }
 
         /* Navbar */
         .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #007bff;
-            padding: 12px 25px;
-            color: white;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
-        .navbar-left h3 {
-            margin: 0;
+        .navbar-brand {
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
 
-        .navbar-right a {
-            color: white;
-            text-decoration: none;
-            margin-left: 20px;
+        .nav-link {
             font-weight: 500;
         }
 
-        .navbar-right a:hover {
-            text-decoration: underline;
+        /* Card Style */
+        .event-card {
+            border: none;
+            border-radius: 18px;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.05);
         }
 
-        .container {
-            padding: 20px 40px;
+        .event-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.08);
         }
 
-        .card-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 25px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-            transition: transform 0.2s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card img {
-            width: 100%;
-            height: 180px;
+        .event-card img {
+            border-top-left-radius: 18px;
+            border-top-right-radius: 18px;
+            height: 200px;
             object-fit: cover;
         }
 
-        .card-content {
-            padding: 15px;
-        }
-
-        .card h4 {
-            margin: 0 0 8px 0;
-        }
-
         .price {
-            font-weight: bold;
-            color: #28a745;
-            margin-top: 8px;
+            font-weight: 600;
+            color: #198754;
         }
 
-        .btn {
-            display: inline-block;
-            padding: 7px 12px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-top: 10px;
+        .btn-view {
+            border-radius: 25px;
+            padding: 6px 18px;
         }
 
-        .btn:hover {
-            background-color: #0056b3;
-        }
-
-        .rating {
-            color: gold;
-            font-size: 15px;
-            margin-bottom: 5px;
-        }
-
-        .notification {
-            color: red;
-            font-weight: bold;
-        }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .card-container {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .card-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 500px) {
-            .card-container {
-                grid-template-columns: repeat(1, 1fr);
-            }
-
-            .navbar {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .navbar-right {
-                margin-top: 10px;
-            }
-        }
+        /* Rating */
         .star {
             font-size: 16px;
         }
-        
+
         .star.full {
-            color: gold;
+            color: #ffc107;
         }
-        
+
         .star.half {
-            background: linear-gradient(90deg, gold 50%, #ddd 50%);
+            background: linear-gradient(90deg, #ffc107 50%, #ddd 50%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        
+
         .star.empty {
             color: #ddd;
         }
-        /* ===== Footer ===== */
-.footer {
-    background-color: #1f2937;
-    color: #d1d5db;
-    padding: 40px 60px 20px 60px;
-    margin-top: 60px;
-}
 
-.footer-container {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 30px;
-}
+        /* Notification */
+        .notification-box {
+            background: #fff3cd;
+            border-radius: 12px;
+            padding: 12px 18px;
+            font-weight: 500;
+        }
 
-.footer h4 {
-    color: white;
-    margin-bottom: 12px;
-}
+        /* Footer */
+        footer {
+            background: #ffffff;
+            margin-top: 80px;
+            padding: 50px 0 20px 0;
+            border-top: 1px solid #eee;
+        }
 
-.footer p,
-.footer a {
-    font-size: 14px;
-    color: #d1d5db;
-    text-decoration: none;
-    line-height: 1.8;
-}
+        footer h5 {
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
 
-.footer a:hover {
-    color: white;
-}
+        footer a {
+            text-decoration: none;
+            color: #6c757d;
+        }
 
-.footer-bottom {
-    text-align: center;
-    border-top: 1px solid #374151;
-    margin-top: 30px;
-    padding-top: 15px;
-    font-size: 13px;
-    color: #9ca3af;
-}
+        footer a:hover {
+            color: black;
+        }
 
-/* Responsive */
-@media (max-width: 900px) {
-    .footer-container {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 500px) {
-    .footer-container {
-        grid-template-columns: repeat(1, 1fr);
-    }
-}
+        .footer-bottom {
+            text-align: center;
+            font-size: 14px;
+            margin-top: 40px;
+            color: #999;
+        }
     </style>
 </head>
+
 <body>
 
-<!-- Navbar -->
-<div class="navbar">
-    <div class="navbar-left">
-        <h3>NexEvent</h3>
+<!-- Modern Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'customer_dashboard' %}">NexEvent</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav gap-3">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'customer_dashboard' %}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'my_bookings' %}">My Bookings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'view_complaints' %}">My Complaints</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'about_us' %}">About Us</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="{% url 'logout' %}">Logout</a>
+                </li>
+            </ul>
+        </div>
     </div>
+</nav>
 
-    <div class="navbar-right">
-        <a href="{% url 'customer_dashboard' %}">Home</a>
-        <a href="{% url 'my_bookings' %}">My Bookings</a>
-        <a href="{% url 'view_complaints' %}">My Complaints</a>
-        <a href="{% url 'about_us' %}">About Us</a>
-        <a href="{% url 'logout' %}">Logout</a>
-    </div>
-</div>
 
-<div class="container">
-    <h3>Welcome {{ user.username }}</h3>
-</div>
+<div class="container mt-5">
 
-<div class="container">
+    <h4 class="mb-4 text-center">Welcome, {{ user.username }} 👋</h4>
 
     {% if unread_replies > 0 %}
-        <p class="notification">
+        <div class="notification-box mb-4">
             🔔 You have {{ unread_replies }} new admin reply!
-            <a href="{% url 'view_complaints' %}">View Now</a>
-        </p>
-        <hr>
+            <a href="{% url 'view_complaints' %}" class="ms-2 fw-semibold">View Now</a>
+        </div>
     {% endif %}
 
-    <h3>Available Events</h3>
+    <h4 class="mb-4">Available Events</h4>
+    <hr>
+    <br>
 
-    <div class="card-container">
+    <div class="row g-4">
 
         {% for event in events %}
-            <div class="card">
+            <div class="col-lg-3 col-md-6">
+                <div class="card event-card h-100">
 
-                {% if event.image %}
-                    <img src="{{ event.image.url }}" alt="{{ event.name }}">
-                {% else %}
-                    <img src="https://via.placeholder.com/400x200?text=No+Image" alt="No Image">
-                {% endif %}
+                    {% if event.image %}
+                        <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.name }}">
+                    {% else %}
+                        <img src="https://via.placeholder.com/400x200?text=No+Image"
+                             class="card-img-top" alt="No Image">
+                    {% endif %}
 
-                <div class="card-content">
+                    <div class="card-body d-flex flex-column">
 
-                    <h4>{{ event.name }}</h4>
+                        <h5 class="card-title">{{ event.name }}</h5>
 
-                    {% if event.avg_rating %}
-    <div class="rating">
+                        {% if event.avg_rating %}
+                            <div class="mb-2">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= event.avg_rating %}
+                                        <span class="star full">★</span>
+                                    {% elif forloop.counter <= event.avg_rating|add:"0.5" %}
+                                        <span class="star half">★</span>
+                                    {% else %}
+                                        <span class="star empty">★</span>
+                                    {% endif %}
+                                {% endfor %}
+                                ({{ event.avg_rating|floatformat:1 }})
+                            </div>
+                        {% else %}
+                            <small class="text-muted">No ratings yet</small>
+                        {% endif %}
 
-        {% for i in "12345" %}
-            {% if forloop.counter <= event.avg_rating %}
-                <span class="star full">★</span>
+                        <p class="card-text text-muted">
+                            {{ event.details|truncatechars:100 }}
+                        </p>
 
-            {% elif forloop.counter <= event.avg_rating|add:"0.5" %}
-                <span class="star half">★</span>
+                        <div class="mt-auto">
+                            <p class="price">₹{{ event.price }}</p>
 
-            {% else %}
-                <span class="star empty">★</span>
-            {% endif %}
-        {% endfor %}
+                            <a href="{% url 'view_event' event.id %}"
+                               class="btn btn-dark btn-view">
+                                View Event
+                            </a>
+                        </div>
 
-        ({{ event.avg_rating|floatformat:1 }})
-
-    </div>
-{% else %}
-    <div>No ratings yet</div>
-{% endif %}
-
-                    <p>{{ event.details|truncatechars:100 }}</p>
-
-                    <p class="price">₹{{ event.price }}</p>
-
-                    <a class="btn" href="{% url 'view_event' event.id %}">
-                        View Event
-                    </a>
-
+                    </div>
                 </div>
             </div>
 
@@ -286,45 +226,45 @@
         {% endfor %}
 
     </div>
-
 </div>
 
-<!-- ===== Footer ===== -->
-<footer class="footer">
 
-    <div class="footer-container">
+<!-- Modern Minimal Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
 
-        <!-- Quick Links -->
-        <div>
-            <h4>Quick Links</h4>
-            <p><a href="{% url 'my_bookings' %}">My Bookings</a></p>
-            <p><a href="{% url 'view_complaints' %}">My Complaints</a></p>
-            <p><a href="{% url 'about_us' %}">About Us</a></p>
+            <div class="col-md-4">
+                <h5>Quick Links</h5>
+                <p><a href="{% url 'my_bookings' %}">My Bookings</a></p>
+                <p><a href="{% url 'view_complaints' %}">My Complaints</a></p>
+                <p><a href="{% url 'about_us' %}">About Us</a></p>
+            </div>
+
+            <div class="col-md-4">
+                <h5>Services</h5>
+                <p>Wedding Events</p>
+                <p>Corporate Events</p>
+                <p>Birthday Parties</p>
+            </div>
+
+            <div class="col-md-4">
+                <h5>Contact</h5>
+                <p>Email: support@nexevent.com</p>
+                <p>Phone: +91 98989 89890</p>
+                <p>Kochi, Kerala, India</p>
+            </div>
+
         </div>
 
-        <!-- Services -->
-        <div>
-            <h4>Services</h4>
-            <p>Wedding Events</p>
-            <p>Corporate Events</p>
-            <p>Birthday Parties</p>
+        <div class="footer-bottom">
+            © {{ now|date:"Y" }} NexEvent. All rights reserved.
         </div>
-
-        <!-- Contact -->
-        <div>
-            <h4>Contact Us</h4>
-            <p>Email: support@nexevent.com</p>
-            <p>Phone: +91 98989 89890</p>
-            <p>Kochi, Kerala, India</p>
-        </div>
-
     </div>
-
-    <div class="footer-bottom">
-        © {{ now|date:"Y" }} NexEvent. All rights reserved.
-    </div>
-
 </footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

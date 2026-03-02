@@ -1,56 +1,155 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>My Complaints</title>
 
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
     <style>
-        .btn {
-            display: inline-block;
-            padding: 6px 12px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            margin-bottom: 15px;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f7;
         }
 
-        .btn:hover {
-            background-color: #0056b3;
+        /* Navbar */
+        .navbar {
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
-        .complaint-box {
-            border: 1px solid #ccc;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 15px;
+        /* Complaint Card */
+        .complaint-card {
+            border: none;
+            border-radius: 18px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+            transition: 0.3s ease;
         }
+
+        .complaint-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+        }
+
+        .btn-rounded {
+            border-radius: 25px;
+            padding: 6px 18px;
+        }
+        /* Status Animation */
+.status-badge {
+    animation: fadePulse 0.6s ease-in-out;
+}
+
+@keyframes fadePulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+    }
+}
     </style>
 </head>
 <body>
 
-<h2>My Complaints</h2>
+<!-- Modern Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="{% url 'customer_dashboard' %}">
+            NexEvent
+        </a>
 
-<a href="{% url 'customer_dashboard' %}">Back</a>
-<hr>
-
-<!-- ✅ Submit Complaint Button -->
-<a class="btn" href="{% url 'submit_complaint' %}">
-    + Submit New Complaint
-</a>
-
-{% for c in complaints %}
-    <div class="complaint-box">
-        <strong>{{ c.subject }}</strong>
-        <p>{{ c.message }}</p>
-        <p><strong>Status:</strong> {{ c.status }}</p>
-
-        {% if c.admin_reply %}
-            <p><strong>Admin Reply:</strong> {{ c.admin_reply }}</p>
-        {% endif %}
+        <div class="d-flex gap-3">
+            <a class="nav-link" href="{% url 'customer_dashboard' %}">Back</a>
+            <a class="nav-link text-danger" href="{% url 'logout' %}">Logout</a>
+        </div>
     </div>
-{% empty %}
-    <p>No complaints submitted.</p>
-{% endfor %}
+</nav>
+
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4>My Complaints</h4>
+
+        <!-- Submit Complaint Button -->
+        <a class="btn btn-dark btn-rounded"
+           href="{% url 'submit_complaint' %}">
+            + Submit Complaint
+        </a>
+    </div>
+
+
+    {% for c in complaints %}
+        <div class="card complaint-card mb-4">
+            <div class="card-body">
+
+                <h5 class="card-title">{{ c.subject }}</h5>
+
+                <p class="text-muted">{{ c.message }}</p>
+
+                <!-- Status Badge -->
+                <p>
+                    <strong>Status:</strong>
+                
+                    {% if c.status == "Resolved" %}
+                        <span class="badge rounded-pill bg-success px-3 py-2 status-badge">
+                            ✔ {{ c.status }}
+                        </span>
+                
+                    {% elif c.status == "Pending" %}
+                        <span class="badge rounded-pill bg-warning text-dark px-3 py-2 status-badge">
+                            ⏳ {{ c.status }}
+                        </span>
+                
+                    {% elif c.status == "In Progress" %}
+                        <span class="badge rounded-pill bg-primary px-3 py-2 status-badge">
+                            🔄 {{ c.status }}
+                        </span>
+                
+                    {% elif c.status == "Rejected" %}
+                        <span class="badge rounded-pill bg-danger px-3 py-2 status-badge">
+                            ✖ {{ c.status }}
+                        </span>
+                
+                    {% else %}
+                        <span class="badge rounded-pill bg-secondary px-3 py-2 status-badge">
+                            {{ c.status }}
+                        </span>
+                    {% endif %}
+                </p>
+
+                {% if c.admin_reply %}
+                    <div class="alert alert-light border rounded-4 mt-3">
+                        <strong>Admin Reply:</strong>
+                        <p class="mb-0">{{ c.admin_reply }}</p>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+
+    {% empty %}
+        <div class="text-center text-muted mt-5">
+            <h5>No complaints submitted</h5>
+            <p>You haven’t submitted any complaints yet.</p>
+        </div>
+    {% endfor %}
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

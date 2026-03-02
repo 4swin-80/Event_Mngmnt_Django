@@ -1,237 +1,238 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>{{ event.name }} - Details</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f7;
         }
 
-        .section {
-            margin-bottom: 25px;
+        .navbar {
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
-        .btn {
-            display: inline-block;
-            padding: 6px 12px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
+        .event-card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.05);
         }
 
-        .btn:hover {
-            background-color: #0056b3;
+        .event-image img {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+            border-radius: 20px;
         }
 
-        .btn-danger {
-            background-color: red;
-        }
-
-        .btn-danger:hover {
-            background-color: darkred;
+        .price {
+            font-weight: 600;
+            color: #198754;
+            font-size: 20px;
         }
 
         .star {
-            font-size: 25px;
+            font-size: 26px;
         }
-        
+
         .star.full {
-            color: gold;
+            color: #ffc107;
         }
-        
+
         .star.half {
-            background: linear-gradient(90deg, gold 50%, #ddd 50%);
+            background: linear-gradient(90deg, #ffc107 50%, #ddd 50%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        
+
         .star.empty {
             color: #ddd;
         }
-        
-        /* Keep this for rating input stars */
+
         #starContainer .star {
             cursor: pointer;
-            color: gray;
-        }
-        
-        #starContainer .star.selected {
-            color: gold;
+            color: #ccc;
         }
 
-        .star.selected {
-            color: gold;
+        #starContainer .star.selected {
+            color: #ffc107;
         }
 
         .rating-display {
             font-size: 22px;
-            color: gold;
+            color: #ffc107;
         }
 
         textarea {
-            width: 300px;
-            height: 80px;
-        }
-        .event-image img {
+            border-radius: 12px !important;
             width: 100%;
-            max-width: 600px;
-            height: 300px;
-            object-fit: cover;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            min-height: 100px;
         }
-        
-        .section {
-            margin-bottom: 25px;
-        }
-        
-        .price {
-            font-weight: bold;
-            color: #28a745;
-            font-size: 18px;
+
+        .btn-rounded {
+            border-radius: 25px;
+            padding: 8px 22px;
         }
     </style>
 </head>
 <body>
 
+<!-- Modern Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" href="{% url 'customer_dashboard' %}">
+            NexEvent
+        </a>
 
-    <h3>NexEvent</h3>
-<p>
-<a href="{% url 'customer_dashboard' %}">Back</a> |
-<a href="{% url 'logout' %}">Logout</a>
-</p>
+        <div class="d-flex gap-3">
+            <a class="nav-link" href="{% url 'customer_dashboard' %}">
+                Back
+            </a>
+            <a class="nav-link text-danger" href="{% url 'logout' %}">
+                Logout
+            </a>
+        </div>
+    </div>
+</nav>
 
-<hr>
 
-<h2>{{ event.name }}</h2>
+<div class="container mt-5 mb-5">
 
-<div class="section event-image">
+    <div class="card event-card p-4">
 
-    {% if event.image %}
-        <img src="{{ event.image.url }}" alt="{{ event.name }}">
-    {% else %}
-        <img src="https://via.placeholder.com/600x300?text=No+Image" alt="No Image">
-    {% endif %}
+        <h2 class="mb-4">{{ event.name }}</h2>
 
-</div>
+        <!-- Event Image -->
+        <div class="event-image mb-4">
+            {% if event.image %}
+                <img src="{{ event.image.url }}" alt="{{ event.name }}">
+            {% else %}
+                <img src="https://via.placeholder.com/600x300?text=No+Image">
+            {% endif %}
+        </div>
+        <hr>
 
-<hr>
+        <!-- Average Rating -->
+        <div class="mb-4">
+            <h5>Average Rating</h5>
 
-<!-- ================= EVENT INFO ================= -->
+            {% if avg_rating %}
+                <div class="rating-display">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= avg_rating %}
+                            <span class="star full">★</span>
+                        {% elif forloop.counter <= avg_rating|add:"0.5" %}
+                            <span class="star half">★</span>
+                        {% else %}
+                            <span class="star empty">★</span>
+                        {% endif %}
+                    {% endfor %}
+                    ({{ avg_rating|floatformat:1 }})
+                </div>
+            {% else %}
+                <p class="text-muted">No ratings yet.</p>
+            {% endif %}
+        </div>
 
-<!-- ================= AVERAGE RATING ================= -->
-<div class="section">
-    <h3>Average Rating</h3>
+        <!-- Event Info -->
+        <div class="mb-4">
+            <p><strong>Status:</strong> {{ event.event_status }}</p>
+            <strong>Description</strong><p class="text-muted">{{ event.details }}</p>
+            
+        </div>
 
-    {% if avg_rating %}
-    <div class="rating-display">
+        <!-- Booking Section -->
+        <div class="mb-5">
+            <h5>Booking</h5>
+            <p class="price">₹{{ event.price }}</p>
 
-        {% for i in "12345" %}
-            {% if forloop.counter <= avg_rating %}
-                <span class="star full">★</span>
+            {% if already_booked %}
+                <div class="alert alert-success rounded-4">
+                    You have already booked this event.
+                </div>
+            {% else %}
+                <a class="btn btn-dark btn-rounded"
+                   href="{% url 'book_event' event.id %}">
+                    Book Event
+                </a>
+            {% endif %}
+        </div>
 
-            {% elif forloop.counter <= avg_rating|add:"0.5" %}
-                <span class="star half">★</span>
+        <hr>
+
+        <!-- Rating Section -->
+        <div class="mt-4">
+            <h5>Give Rating</h5>
+
+            {% if existing_rating %}
+
+                <p>
+                    Your Rating:
+                    <span class="rating-display">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= existing_rating.stars %}
+                                ★
+                            {% else %}
+                                ☆
+                            {% endif %}
+                        {% endfor %}
+                    </span>
+                </p>
+
+                <p class="text-muted">{{ existing_rating.description }}</p>
+
+                <a class="btn btn-danger btn-rounded"
+                   href="{% url 'delete_rating' existing_rating.id %}">
+                    Delete Rating
+                </a>
 
             {% else %}
-                <span class="star empty">★</span>
-            {% endif %}
-        {% endfor %}
 
-        ({{ avg_rating|floatformat:1 }})
+                <form method="post">
+                    {% csrf_token %}
+
+                    <input type="hidden" name="stars" id="starsInput">
+
+                    <div id="starContainer" class="mb-3">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.description }}
+                    </div>
+
+                    <button class="btn btn-dark btn-rounded" type="submit">
+                        Submit Rating
+                    </button>
+                </form>
+
+            {% endif %}
+        </div>
 
     </div>
-{% else %}
-    <p>No ratings yet.</p>
-{% endif %}
+
 </div>
 
-<div class="section">
-    
-    <p><strong>Status:</strong> {{ event.event_status }}</p>
 
-    <p>{{ event.details|truncatechars:100 }}</p>
-
-    <p class="price">₹{{ event.price }}</p>
-</div>
-
-<!-- ================= BOOKING ================= -->
-<div class="section">
-    <h3>Booking</h3>
-
-    {% if already_booked %}
-        <p style="color:green;">You have already booked this event.</p>
-    {% else %}
-        <a class="btn" href="{% url 'book_event' event.id %}">
-            Book Event
-        </a>
-    {% endif %}
-</div>
-
-<hr>
-
-<!-- ================= GIVE RATING ================= -->
-<div class="section">
-    <h3>Give Rating</h3>
-
-    {% if existing_rating %}
-
-        <p>
-            Your Rating:
-            <span class="rating-display">
-                {% for i in "12345" %}
-                    {% if forloop.counter <= existing_rating.stars %}
-                        ★
-                    {% else %}
-                        ☆
-                    {% endif %}
-                {% endfor %}
-            </span>
-        </p>
-
-        <p>{{ existing_rating.description }}</p>
-
-        <a class="btn btn-danger"
-           href="{% url 'delete_rating' existing_rating.id %}">
-            Delete Rating
-        </a>
-
-    {% else %}
-
-        <form method="post">
-            {% csrf_token %}
-
-            <input type="hidden" name="stars" id="starsInput">
-
-            <div id="starContainer">
-                <span class="star" data-value="1">★</span>
-                <span class="star" data-value="2">★</span>
-                <span class="star" data-value="3">★</span>
-                <span class="star" data-value="4">★</span>
-                <span class="star" data-value="5">★</span>
-            </div>
-
-            <br>
-
-            {{ form.description }}
-
-            <br><br>
-
-            <button class="btn" type="submit">
-                Submit Rating
-            </button>
-        </form>
-
-    {% endif %}
-</div>
-
-<!-- ================= STAR SCRIPT ================= -->
+<!-- Star Selection Script -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
-    const stars = document.querySelectorAll(".star");
+    const stars = document.querySelectorAll("#starContainer .star");
     const input = document.getElementById("starsInput");
 
     stars.forEach(star => {
@@ -249,6 +250,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
 });
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
