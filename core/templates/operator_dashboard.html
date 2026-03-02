@@ -164,34 +164,42 @@
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-light sticky-top">
     <div class="container-fluid px-4">
-        <span class="navbar-brand fw-semibold">Operator Panel</span>
+        <span class="navbar-brand fw-semibold">NexEvent</span>
 
+        
+        
         <div class="d-flex gap-3 align-items-center">
-            <span>Welcome {{ user.username }}</span>
-
+        
             <a href="{% url 'earnings' %}" class="btn btn-outline-dark btn-sm btn-rounded">
                 Earnings
             </a>
-
+        
             <a href="{% url 'chat' %}" class="text-decoration-none">
                 Chat
                 {% if unread_count > 0 %}
                     <span class="text-danger">●</span>
                 {% endif %}
             </a>
-
+        
             <a href="{% url 'logout' %}" class="text-danger text-decoration-none">
                 Logout
             </a>
         </div>
-    </div>
 </nav>
+<br>
+<br>
+<h4 class="mb-4 text-center">
+    Welcome {{ user.username }}
+</h4>
+<center><hr style="width: 95%;"></center>
+<br>
+
 
 <div class="container mt-4 mb-5">
 
 <!-- Attendance Section -->
 <div class="card-panel mb-4">
-    <h5 class="mb-4">Attendance</h5>
+    <h5 class="mb-4 text-center">Attendance</h5>
 
     <div class="d-flex align-items-center justify-content-center gap-3">
 
@@ -237,7 +245,7 @@
 
     <!-- Pending Cues -->
     <div class="card-panel mb-4">
-        <h5 class="mb-4">Pending Cues</h5>
+        <h5 class="mb-4 text-center">Pending Cues</h5>
 
         {% for cue in cues %}
             <div class="cue-card">
@@ -271,92 +279,121 @@
 
     <!-- Live Alerts -->
     <div class="card-panel">
-        <h5 class="mb-3">Live Alerts</h5>
+        <h5 class="mb-3 text-center">Live Alerts</h5>
         <div id="alerts"></div>
     </div>
 
 </div>
 
 
-<script>
-const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-const socket = new WebSocket(protocol + window.location.host + "/ws/alerts/");
-
-const soundUrl = "{% static 'audio/smooth_notification.mp3' %}";
-let audioUnlocked = false;
-
-const audio = new Audio(soundUrl);
-audio.preload = "auto";
-
-document.addEventListener("click", function unlock() {
-    audio.play()
-        .then(() => {
-            audio.pause();
-            audio.currentTime = 0;
-            audioUnlocked = true;
-        })
-        .catch(err => console.log("Unlock failed:", err));
-
-    document.removeEventListener("click", unlock);
-});
-
-function playSound() {
-    if (!audioUnlocked) return;
-    audio.currentTime = 0;
-    audio.play().catch(err => console.log("Play blocked:", err));
-}
-
-socket.onmessage = function(e) {
-    const data = JSON.parse(e.data);
-
-    const alertDiv = document.createElement("div");
-    alertDiv.className = "live-alert mb-2";
-    alertDiv.innerHTML = data.message;
-
-    document.getElementById("alerts").appendChild(alertDiv);
-
-    playSound();
-};
-</script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    function handleToggle(toggle) {
-    
+document.addEventListener("DOMContentLoaded", function () {
+
+    /* ==============================
+       🔔 WebSocket Live Alerts
+    ============================== */
+
+    const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+    const socketUrl = protocol + window.location.host + "/ws/alerts/";
+    const socket = new WebSocket(socketUrl);
+
+    const soundUrl = "{% static 'audio/smooth_notification.mp3' %}";
+    const audio = new Audio(soundUrl);
+    audio.preload = "auto";
+
+    let audioUnlocked = false;
+
+    // Unlock audio on first user interaction
+    function unlockAudio() {
+        audio.play()
+            .then(() => {
+                audio.pause();
+                audio.currentTime = 0;
+                audioUnlocked = true;
+            })
+            .catch(() => {});
+        document.removeEventListener("click", unlockAudio);
+    }
+
+    document.addEventListener("click", unlockAudio);
+
+    function playSound() {
+        if (!audioUnlocked) return;
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+    }
+
+    socket.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+
+        const alertDiv = document.createElement("div");
+        alertDiv.className = "live-alert mb-2";
+        alertDiv.innerHTML = data.message;
+
+        const alertContainer = document.getElementById("alerts");
+        if (alertContainer) {
+            alertContainer.appendChild(alertDiv);
+        }
+
+        playSound();
+    };
+
+    socket.onerror = function () {
+        console.log("WebSocket error.");
+    };
+
+    socket.onclose = function () {
+        console.log("WebSocket disconnected.");
+    };
+
+
+    /* ==============================
+       🔄 Attendance Toggle
+    ============================== */
+
+    window.handleToggle = function (toggle) {
         if (toggle.checked) {
-            // Going from OFF → ON (Check In)
             window.location.href = "{% url 'check_in' %}";
         } else {
-            // Going from ON → OFF (Check Out)
             window.location.href = "{% url 'check_out' %}";
         }
-    }
-    </script>
-    <script>
-        {% if is_checked_in %}
-            const checkInTime = new Date("{{ check_in_time|date:'c' }}");
-        
-            function updateTimer() {
-                const now = new Date();
-                const diff = now - checkInTime;
-        
-                const hours = Math.floor(diff / (1000 * 60 * 60));
-                const minutes = Math.floor((diff / (1000 * 60)) % 60);
-                const seconds = Math.floor((diff / 1000) % 60);
-        
-                const formatted =
-                    String(hours).padStart(2, '0') + ":" +
-                    String(minutes).padStart(2, '0') + ":" +
-                    String(seconds).padStart(2, '0');
-        
-                document.getElementById("liveTimer").textContent = formatted;
+    };
+
+
+    /* ==============================
+       ⏱ Live Shift Timer
+    ============================== */
+
+    {% if is_checked_in %}
+        const checkInTime = new Date("{{ check_in_time|date:'c' }}");
+        const timerElement = document.getElementById("liveTimer");
+
+        function updateTimer() {
+            const now = new Date();
+            const diff = now - checkInTime;
+
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff / (1000 * 60)) % 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+
+            const formatted =
+                String(hours).padStart(2, '0') + ":" +
+                String(minutes).padStart(2, '0') + ":" +
+                String(seconds).padStart(2, '0');
+
+            if (timerElement) {
+                timerElement.textContent = formatted;
             }
-        
-            updateTimer();
-            setInterval(updateTimer, 1000);
-        {% endif %}
-        </script>
+        }
+
+        updateTimer();
+        setInterval(updateTimer, 1000);
+    {% endif %}
+
+});
+</script>
 
 </body>
 </html>

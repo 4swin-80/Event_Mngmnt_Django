@@ -344,24 +344,20 @@ def admin_dashboard(request):
 # =========================
 # OPERATOR DASHBOARD
 # =========================
+from .models import Attendance
+from django.utils import timezone
+
 @login_required
 def operator_dashboard(request):
 
-    # 🔐 Only operator allowed
     if request.user.role != "operator":
         return redirect("login")
 
-    # =========================
-    # Pending Cues
-    # =========================
     cues = Cue.objects.filter(
         operator=request.user,
         cue_status="Pending"
     ).select_related("event").order_by("cue_date", "cue_time")
 
-    # =========================
-    # 🔴 Unread Chat Messages
-    # =========================
     from .models import ChatMessage
 
     unread_count = ChatMessage.objects.filter(
@@ -369,12 +365,22 @@ def operator_dashboard(request):
         is_seen=False
     ).count()
 
-    # =========================
-    # Render Dashboard
-    # =========================
+    open_attendance = Attendance.objects.filter(
+        operator=request.user,
+        check_out_time__isnull=True
+    ).first()
+
+    is_checked_in = True if open_attendance else False
+
+    check_in_time = None
+    if open_attendance:
+        check_in_time = open_attendance.check_in_time
+
     return render(request, "operator_dashboard.html", {
         "cues": cues,
-        "unread_count": unread_count,  # 🔥 for red dot
+        "unread_count": unread_count,
+        "is_checked_in": is_checked_in,
+        "check_in_time": check_in_time,   # 🔥 new
     })
 
 

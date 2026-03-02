@@ -76,15 +76,32 @@ class CueForm(forms.ModelForm):
 
 
 class LoginForm(AuthenticationForm):
-    username = forms.CharField(widget=forms.TextInput(attrs={
-        'class': 'form-control',
-        'placeholder': 'Username'
-    }))
+    username = forms.CharField(
+        label="Username",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control form-control-lg',
+            'placeholder': 'Enter username',
+            'autocomplete': 'username'
+        })
+    )
 
-    password = forms.CharField(widget=forms.PasswordInput(attrs={
-        'class': 'form-control',
-        'placeholder': 'Password'
-    }))
+    password = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control form-control-lg',
+            'placeholder': 'Enter password',
+            'autocomplete': 'current-password'
+        })
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Add spacing class to all fields
+        for field in self.fields.values():
+            field.widget.attrs.update({
+                'class': field.widget.attrs.get('class', '') + ' mb-3'
+            })
 
 class EventForm(forms.ModelForm):
     class Meta:
@@ -152,6 +169,28 @@ class CustomerRegisterForm(UserCreationForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.role = "customer"  # 🔥 force role
+        if commit:
+            user.save()
+        return user
+    
+class CustomerRegisterForm(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ["username", "email", "password1", "password2"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Remove default help texts
+        for field in self.fields.values():
+            field.help_text = None
+            field.widget.attrs.update({
+                'class': 'form-control form-control-lg mb-3'
+            })
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.role = "customer"
         if commit:
             user.save()
         return user
