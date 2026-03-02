@@ -20,7 +20,12 @@ class User(AbstractUser):
         ('stage', 'Stage'),
     )
 
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        blank=True,
+        null=True
+    )
 
     phone = models.CharField(max_length=15, blank=True, null=True)
 

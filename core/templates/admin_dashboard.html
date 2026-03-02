@@ -114,7 +114,7 @@ Welcome {{ user.username }} |
     <p>No bookings yet.</p>
 {% endfor %}
 </div>
-
+<br>
 <hr>
 <h2>Manage Accounts</h2>
 
@@ -128,13 +128,14 @@ Welcome {{ user.username }} |
             <form method="post" action="{% url 'update_user_role' user.id %}">
                 {% csrf_token %}
                 <select name="role">
-                    <option value="admin" selected>Admin</option>
+                    <option value="none">None</option>
+                    <option value="admin">Admin</option>
                     <option value="operator">Operator</option>
                     <option value="customer">Customer</option>
                 </select>
 
                 <select name="operator_role">
-                    <option value="">--Operator Role--</option>
+                    <option value="none">None</option>
                     <option value="lighting">Lighting</option>
                     <option value="sound">Sound</option>
                     <option value="stage">Stage</option>
@@ -157,8 +158,9 @@ Welcome {{ user.username }} |
             <form method="post" action="{% url 'update_user_role' user.id %}">
                 {% csrf_token %}
                 <select name="role">
+                    <option value="none">None</option>
                     <option value="admin">Admin</option>
-                    <option value="operator" selected>Operator</option>
+                    <option value="operator">Operator</option>
                     <option value="customer">Customer</option>
                 </select>
 
@@ -184,13 +186,14 @@ Welcome {{ user.username }} |
             <form method="post" action="{% url 'update_user_role' user.id %}">
                 {% csrf_token %}
                 <select name="role">
+                    <option value="none">None</option>
                     <option value="admin">Admin</option>
                     <option value="operator">Operator</option>
-                    <option value="customer" selected>Customer</option>
+                    <option value="customer">Customer</option>
                 </select>
 
                 <select name="operator_role">
-                    <option value="">--Operator Role--</option>
+                    <option value="none">None</option>
                     <option value="lighting">Lighting</option>
                     <option value="sound">Sound</option>
                     <option value="stage">Stage</option>

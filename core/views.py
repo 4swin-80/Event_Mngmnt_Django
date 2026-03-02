@@ -726,15 +726,23 @@ def update_user_role(request, user_id):
         new_role = request.POST.get("role")
         new_operator_role = request.POST.get("operator_role")
 
-        user_obj.role = new_role
-
-        # 🔥 If role is operator → assign operator_role
-        if new_role == "operator":
-            user_obj.operator_role = new_operator_role
-        else:
+        # 🔥 Handle "none" role
+        if new_role == "none":
+            user_obj.role = None
             user_obj.operator_role = None
+        else:
+            user_obj.role = new_role
+
+            # 🔥 Handle operator role
+            if new_role == "operator":
+                if new_operator_role == "none":
+                    user_obj.operator_role = None
+                else:
+                    user_obj.operator_role = new_operator_role
+            else:
+                user_obj.operator_role = None
 
         user_obj.save()
 
-        messages.success(request, "User role updated successfully.")
+        messages.success(request, "User updated successfully.")
         return redirect("admin_dashboard")
