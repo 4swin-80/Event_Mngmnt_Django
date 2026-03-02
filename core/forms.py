@@ -50,7 +50,10 @@ class CueForm(forms.ModelForm):
                 'type': 'time',
                 'class': 'form-control'
             }),
-            'cue_action': forms.Select(attrs={'class': 'form-select'}),
+            'cue_action': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter cue action (e.g., Turn on spotlight)'
+            }),
             'note': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3
