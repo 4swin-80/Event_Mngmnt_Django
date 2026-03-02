@@ -96,6 +96,12 @@ Welcome {{ user.username }} |
     <a href="{% url 'notification_list' %}">Notifications</a> | 
     <a href="{% url 'attendance' %}">Attendance & Payment</a> | 
     <a href="{% url 'performance' %}">Performance</a> | 
+    <a href="{% url 'chat' %}">
+        Chat
+        {% if unread_count > 0 %}
+            <span style="color:red;">●</span>
+        {% endif %}
+    </a> | 
     <a href="{% url 'admin_complaints' %}">Customer Complaints</a>
  </nav>
 </p>

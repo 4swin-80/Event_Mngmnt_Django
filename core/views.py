@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from datetime import timedelta
 from django.http import JsonResponse
-from .models import Event, Cue, Notification, Attendance, Booking, Rating, Complaint, Salary, User
+from .models import Event, Cue, Notification, Attendance, Booking, Rating, Complaint, Salary, User, ChatMessage
 from .forms import EventForm, CueForm, RatingForm, ComplaintForm, AdminReplyForm, BookingForm, CustomerRegisterForm
 
 
@@ -283,22 +283,52 @@ def logout_view(request):
 # =========================
 @login_required
 def admin_dashboard(request):
+    # 🔐 Only admin allowed
     if request.user.role != "admin":
         return redirect("login")
 
-    total_events = Event.objects.filter(admin=request.user).count()
-    total_cues = Cue.objects.count()
-    total_operators = Attendance.objects.values("operator").distinct().count()
+    # =========================
+    # System Overview
+    # =========================
+    total_events = Event.objects.filter(
+        admin=request.user
+    ).count()
 
+    total_cues = Cue.objects.count()
+
+    total_operators = Attendance.objects.values(
+        "operator"
+    ).distinct().count()
+
+    # =========================
+    # Latest Bookings
+    # =========================
     bookings = Booking.objects.filter(
         event__admin=request.user
-    ).select_related("event", "customer").order_by("-booking_date")
+    ).select_related(
+        "event", "customer"
+    ).order_by("-booking_date")
 
-    # 🔥 Get users by role
+    # =========================
+    # User Management Lists
+    # =========================
     admins = User.objects.filter(role="admin")
     operators = User.objects.filter(role="operator")
     customers = User.objects.filter(role="customer")
 
+    # =========================
+    # 🔴 Unread Chat Messages
+    # =========================
+    from .models import ChatMessage
+
+    unread_count = ChatMessage.objects.filter(
+        receiver=request.user,
+        is_seen=False
+    ).count()
+
+    # =========================
+    # Render Dashboard
+    # =========================
     return render(request, "admin_dashboard.html", {
         "total_events": total_events,
         "total_cues": total_cues,
@@ -307,6 +337,7 @@ def admin_dashboard(request):
         "admins": admins,
         "operators": operators,
         "customers": customers,
+        "unread_count": unread_count,  # 🔥 for red dot
     })
 
 
@@ -315,13 +346,35 @@ def admin_dashboard(request):
 # =========================
 @login_required
 def operator_dashboard(request):
+
+    # 🔐 Only operator allowed
     if request.user.role != "operator":
         return redirect("login")
 
-    cues = Cue.objects.filter(operator=request.user, cue_status="Pending")
+    # =========================
+    # Pending Cues
+    # =========================
+    cues = Cue.objects.filter(
+        operator=request.user,
+        cue_status="Pending"
+    ).select_related("event").order_by("cue_date", "cue_time")
 
+    # =========================
+    # 🔴 Unread Chat Messages
+    # =========================
+    from .models import ChatMessage
+
+    unread_count = ChatMessage.objects.filter(
+        receiver=request.user,
+        is_seen=False
+    ).count()
+
+    # =========================
+    # Render Dashboard
+    # =========================
     return render(request, "operator_dashboard.html", {
-        "cues": cues
+        "cues": cues,
+        "unread_count": unread_count,  # 🔥 for red dot
     })
 
 
@@ -746,3 +799,61 @@ def update_user_role(request, user_id):
 
 def about_us(request):
     return render(request, "about_us.html")
+
+
+@login_required
+def chat_view(request):
+
+    if request.user.role not in ["admin", "operator"]:
+        return redirect("login")
+
+    # 🔥 Determine opposite role user list
+    if request.user.role == "admin":
+        users = User.objects.filter(role="operator")
+    else:
+        users = User.objects.filter(role="admin")
+
+    selected_user_id = request.GET.get("user")
+
+    messages = []
+    selected_user = None
+
+    if selected_user_id:
+        selected_user = get_object_or_404(User, id=selected_user_id)
+
+        messages = ChatMessage.objects.filter(
+            sender__in=[request.user, selected_user],
+            receiver__in=[request.user, selected_user]
+        ).order_by("created_at")
+
+        # 🔥 Mark as seen
+        ChatMessage.objects.filter(
+            sender=selected_user,
+            receiver=request.user,
+            is_seen=False
+        ).update(is_seen=True)
+
+    return render(request, "chat.html", {
+        "users": users,
+        "messages": messages,
+        "selected_user": selected_user
+    })
+
+
+
+@login_required
+def send_message(request, user_id):
+
+    receiver = get_object_or_404(User, id=user_id)
+
+    if request.method == "POST":
+        message_text = request.POST.get("message")
+
+        if message_text:
+            ChatMessage.objects.create(
+                sender=request.user,
+                receiver=receiver,
+                message=message_text
+            )
+
+    return redirect(f"/chat/?user={receiver.id}")

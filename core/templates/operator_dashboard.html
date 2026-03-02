@@ -79,8 +79,13 @@
 <p>
     Welcome {{ user.username }} |
     <a href="{% url 'logout' %}">Logout</a> |
-    <a href="{% url 'earnings' %}">Earnings</a> 
-    <a href="{% url 'earnings' %}">Chat</a> 
+    <a href="{% url 'earnings' %}">Earnings</a> | 
+    <a href="{% url 'chat' %}">
+        Chat
+        {% if unread_count > 0 %}
+            <span style="color:red;">●</span>
+        {% endif %}
+    </a>
 </p>
 
 <hr>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat</title>
+
+    <style>
+        body { font-family: Arial; display:flex; }
+
+        .users {
+            width: 25%;
+            border-right: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        .chat-box {
+            width: 75%;
+            padding: 10px;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        .sent {
+            background: #d1f7d6;
+            text-align: right;
+        }
+
+        .received {
+            background: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="users">
+    <h3>Users</h3>
+    <a href="{% url 'admin_dashboard' %}">Back</a>
+    <hr>
+
+    {% for u in users %}
+        <p>
+            <a href="?user={{ u.id }}">{{ u.username }}</a>
+        </p>
+    {% endfor %}
+</div>
+
+<div class="chat-box">
+
+    {% if selected_user %}
+        <h3>Chat with {{ selected_user.username }}</h3>
+
+        <div>
+            {% for msg in messages %}
+                <div class="message {% if msg.sender == request.user %}sent{% else %}received{% endif %}">
+                    {{ msg.message }}
+                </div>
+            {% empty %}
+                <p>No messages yet.</p>
+            {% endfor %}
+        </div>
+
+        <form method="post" action="{% url 'send_message' selected_user.id %}">
+            {% csrf_token %}
+            <input type="text" name="message" style="width:70%;" required>
+            <button type="submit">Send</button>
+        </form>
+
+    {% else %}
+        <p>Select a user to start chat.</p>
+    {% endif %}
+
+</div>
+
+</body>
+</html>

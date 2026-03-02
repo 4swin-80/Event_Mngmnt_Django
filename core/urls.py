@@ -45,4 +45,6 @@ urlpatterns = [
     path('register/', views.register_view, name='register'),
     path('update-user-role/<int:user_id>/', views.update_user_role, name='update_user_role'),
     path('about-us/', views.about_us, name='about_us'),
+    path('chat/', views.chat_view, name='chat'),
+    path('send-message/<int:user_id>/', views.send_message, name='send_message'),
 ]
