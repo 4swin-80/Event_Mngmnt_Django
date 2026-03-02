@@ -762,3 +762,7 @@ def update_user_role(request, user_id):
         })
 
     return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+def about_us(request):
+    return render(request, "about_us.html")

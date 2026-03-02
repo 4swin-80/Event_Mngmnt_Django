@@ -146,6 +146,58 @@
         .star.empty {
             color: #ddd;
         }
+        /* ===== Footer ===== */
+.footer {
+    background-color: #1f2937;
+    color: #d1d5db;
+    padding: 40px 60px 20px 60px;
+    margin-top: 60px;
+}
+
+.footer-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+}
+
+.footer h4 {
+    color: white;
+    margin-bottom: 12px;
+}
+
+.footer p,
+.footer a {
+    font-size: 14px;
+    color: #d1d5db;
+    text-decoration: none;
+    line-height: 1.8;
+}
+
+.footer a:hover {
+    color: white;
+}
+
+.footer-bottom {
+    text-align: center;
+    border-top: 1px solid #374151;
+    margin-top: 30px;
+    padding-top: 15px;
+    font-size: 13px;
+    color: #9ca3af;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .footer-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 500px) {
+    .footer-container {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}
     </style>
 </head>
 <body>
@@ -157,8 +209,10 @@
     </div>
 
     <div class="navbar-right">
+        <a href="{% url 'customer_dashboard' %}">Home</a>
         <a href="{% url 'my_bookings' %}">My Bookings</a>
         <a href="{% url 'view_complaints' %}">My Complaints</a>
+        <a href="{% url 'about_us' %}">About Us</a>
         <a href="{% url 'logout' %}">Logout</a>
     </div>
 </div>
@@ -234,6 +288,43 @@
     </div>
 
 </div>
+
+<!-- ===== Footer ===== -->
+<footer class="footer">
+
+    <div class="footer-container">
+
+        <!-- Quick Links -->
+        <div>
+            <h4>Quick Links</h4>
+            <p><a href="{% url 'my_bookings' %}">My Bookings</a></p>
+            <p><a href="{% url 'view_complaints' %}">My Complaints</a></p>
+            <p><a href="{% url 'about_us' %}">About Us</a></p>
+        </div>
+
+        <!-- Services -->
+        <div>
+            <h4>Services</h4>
+            <p>Wedding Events</p>
+            <p>Corporate Events</p>
+            <p>Birthday Parties</p>
+        </div>
+
+        <!-- Contact -->
+        <div>
+            <h4>Contact Us</h4>
+            <p>Email: support@nexevent.com</p>
+            <p>Phone: +91 98765 43210</p>
+            <p>Kochi, Kerala, India</p>
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+        © {{ now|date:"Y" }} NexEvent. All rights reserved.
+    </div>
+
+</footer>
 
 </body>
 </html>
