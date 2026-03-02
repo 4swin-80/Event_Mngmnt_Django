@@ -123,22 +123,48 @@ Welcome {{ user.username }} |
     <h3>Admin Accounts</h3>
     {% for user in admins %}
         <div class="account-card">
-            <strong>{{ user.username }}</strong> ({{ user.email }})
+            <strong>{{ user.username }}</strong>
 
             <form method="post" action="{% url 'update_user_role' user.id %}">
                 {% csrf_token %}
                 <select name="role">
-                    <option value="none">None</option>
-                    <option value="admin">Admin</option>
-                    <option value="operator">Operator</option>
-                    <option value="customer">Customer</option>
+                    <option value="none" {% if not user.role %}selected{% endif %}>None</option>
+                
+                    <option value="admin"
+                        {% if user.role == "admin" %}selected{% endif %}>
+                        Admin
+                    </option>
+                
+                    <option value="operator"
+                        {% if user.role == "operator" %}selected{% endif %}>
+                        Operator
+                    </option>
+                
+                    <option value="customer"
+                        {% if user.role == "customer" %}selected{% endif %}>
+                        Customer
+                    </option>
                 </select>
 
                 <select name="operator_role">
-                    <option value="none">None</option>
-                    <option value="lighting">Lighting</option>
-                    <option value="sound">Sound</option>
-                    <option value="stage">Stage</option>
+                    <option value="none" {% if not user.operator_role %}selected{% endif %}>
+                        None
+                    </option>
+                
+                    <option value="lighting"
+                        {% if user.operator_role == "lighting" %}selected{% endif %}>
+                        Lighting
+                    </option>
+                
+                    <option value="sound"
+                        {% if user.operator_role == "sound" %}selected{% endif %}>
+                        Sound
+                    </option>
+                
+                    <option value="stage"
+                        {% if user.operator_role == "stage" %}selected{% endif %}>
+                        Stage
+                    </option>
                 </select>
 
                 <button class="update-btn">Update</button>
@@ -158,16 +184,43 @@ Welcome {{ user.username }} |
             <form method="post" action="{% url 'update_user_role' user.id %}">
                 {% csrf_token %}
                 <select name="role">
-                    <option value="none">None</option>
-                    <option value="admin">Admin</option>
-                    <option value="operator">Operator</option>
-                    <option value="customer">Customer</option>
+                    <option value="none" {% if not user.role %}selected{% endif %}>None</option>
+                
+                    <option value="admin"
+                        {% if user.role == "admin" %}selected{% endif %}>
+                        Admin
+                    </option>
+                
+                    <option value="operator"
+                        {% if user.role == "operator" %}selected{% endif %}>
+                        Operator
+                    </option>
+                
+                    <option value="customer"
+                        {% if user.role == "customer" %}selected{% endif %}>
+                        Customer
+                    </option>
                 </select>
 
                 <select name="operator_role">
-                    <option value="lighting" {% if user.operator_role == "lighting" %}selected{% endif %}>Lighting</option>
-                    <option value="sound" {% if user.operator_role == "sound" %}selected{% endif %}>Sound</option>
-                    <option value="stage" {% if user.operator_role == "stage" %}selected{% endif %}>Stage</option>
+                    <option value="none" {% if not user.operator_role %}selected{% endif %}>
+                        None
+                    </option>
+                
+                    <option value="lighting"
+                        {% if user.operator_role == "lighting" %}selected{% endif %}>
+                        Lighting
+                    </option>
+                
+                    <option value="sound"
+                        {% if user.operator_role == "sound" %}selected{% endif %}>
+                        Sound
+                    </option>
+                
+                    <option value="stage"
+                        {% if user.operator_role == "stage" %}selected{% endif %}>
+                        Stage
+                    </option>
                 </select>
 
                 <button class="update-btn">Update</button>
@@ -186,17 +239,43 @@ Welcome {{ user.username }} |
             <form method="post" action="{% url 'update_user_role' user.id %}">
                 {% csrf_token %}
                 <select name="role">
-                    <option value="none">None</option>
-                    <option value="admin">Admin</option>
-                    <option value="operator">Operator</option>
-                    <option value="customer">Customer</option>
+                    <option value="none" {% if not user.role %}selected{% endif %}>None</option>
+                
+                    <option value="admin"
+                        {% if user.role == "admin" %}selected{% endif %}>
+                        Admin
+                    </option>
+                
+                    <option value="operator"
+                        {% if user.role == "operator" %}selected{% endif %}>
+                        Operator
+                    </option>
+                
+                    <option value="customer"
+                        {% if user.role == "customer" %}selected{% endif %}>
+                        Customer
+                    </option>
                 </select>
 
                 <select name="operator_role">
-                    <option value="none">None</option>
-                    <option value="lighting">Lighting</option>
-                    <option value="sound">Sound</option>
-                    <option value="stage">Stage</option>
+                    <option value="none" {% if not user.operator_role %}selected{% endif %}>
+                        None
+                    </option>
+                
+                    <option value="lighting"
+                        {% if user.operator_role == "lighting" %}selected{% endif %}>
+                        Lighting
+                    </option>
+                
+                    <option value="sound"
+                        {% if user.operator_role == "sound" %}selected{% endif %}>
+                        Sound
+                    </option>
+                
+                    <option value="stage"
+                        {% if user.operator_role == "stage" %}selected{% endif %}>
+                        Stage
+                    </option>
                 </select>
 
                 <button class="update-btn">Update</button>
