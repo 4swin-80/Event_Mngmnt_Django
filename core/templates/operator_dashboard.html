@@ -16,6 +16,60 @@
             font-size: 24px;
             animation: blink 1s infinite;
         }
+        
+/* Cue Card */
+.cue-card {
+    background: #ffffff;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+}
+
+/* Event Name */
+.cue-event {
+    font-size: 14px;
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 6px;
+}
+
+/* Action + Time */
+.cue-main {
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.cue-time {
+    color: #666;
+    font-size: 14px;
+}
+
+/* 🔥 Blue Left Border Note */
+.cue-note {
+    background: #f0f7ff;
+    border-left: 4px solid #007bff;
+    padding: 8px 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #333;
+    border-radius: 4px;
+}
+
+/* Complete Button */
+.complete-btn {
+    display: inline-block;
+    padding: 6px 10px;
+    background: #28a745;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.complete-btn:hover {
+    background: #218838;
+}
     </style>
 </head>
 <body>
@@ -26,6 +80,7 @@
     Welcome {{ user.username }} |
     <a href="{% url 'logout' %}">Logout</a> |
     <a href="{% url 'earnings' %}">Earnings</a> 
+    <a href="{% url 'earnings' %}">Chat</a> 
 </p>
 
 <hr>
@@ -39,24 +94,32 @@
 <h3>Pending Cues</h3>
 
 {% for cue in cues %}
-    <div style="margin-bottom:15px; padding:10px; border:1px solid #ddd; border-radius:6px;">
-        
-        <strong>{{ cue.cue_action }}</strong>
-        ({{ cue.cue_time }})
-        <br>
+    <div class="cue-card">
 
+        <!-- 🔥 Event Name -->
+        <div class="cue-event">
+            📅 {{ cue.event.name }}
+        </div>
+
+        <!-- Cue Action + Time -->
+        <div class="cue-main">
+            <strong>{{ cue.cue_action }}</strong>
+            <span class="cue-time">({{ cue.cue_time }})</span>
+        </div>
+
+        <!-- 🔥 Note Section -->
         {% if cue.note %}
-            <small style="color:#555;">
-                📝 <strong>Note:</strong> {{ cue.note }}
-            </small>
-            <br>
+            <div class="cue-note">
+                📝 {{ cue.note }}
+            </div>
         {% endif %}
 
-        <a href="{% url 'complete_cue' cue.id %}">
+        <a class="complete-btn" href="{% url 'complete_cue' cue.id %}">
             ✅ Mark Completed
         </a>
 
     </div>
+
 {% empty %}
     <p>No pending cues.</p>
 {% endfor %}
