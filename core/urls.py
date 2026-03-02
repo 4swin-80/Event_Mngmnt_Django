@@ -46,4 +46,5 @@ urlpatterns = [
     path('earnings/', views.earnings_view, name='earnings'),
 
     path('register/', views.register_view, name='register'),
+    path('update-user-role/<int:user_id>/', views.update_user_role, name='update_user_role'),
 ]

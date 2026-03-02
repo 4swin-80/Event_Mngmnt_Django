@@ -42,7 +42,30 @@
         @media (max-width: 480px) {
             .card-container { grid-template-columns: repeat(1, 1fr); }
         }
+
+        .account-box {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .account-card {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        select {
+            padding: 4px;
+        }
+        .update-btn {
+            padding: 4px 8px;
+            background: green;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
     </style>
+
 </head>
 <body>
 
@@ -90,6 +113,93 @@ Welcome {{ user.username }} |
 {% empty %}
     <p>No bookings yet.</p>
 {% endfor %}
+</div>
+
+<hr>
+<h2>Manage Accounts</h2>
+
+<!-- ================= ADMIN USERS ================= -->
+<div class="account-box">
+    <h3>Admin Accounts</h3>
+    {% for user in admins %}
+        <div class="account-card">
+            <strong>{{ user.username }}</strong> ({{ user.email }})
+
+            <form method="post" action="{% url 'update_user_role' user.id %}">
+                {% csrf_token %}
+                <select name="role">
+                    <option value="admin" selected>Admin</option>
+                    <option value="operator">Operator</option>
+                    <option value="customer">Customer</option>
+                </select>
+
+                <select name="operator_role">
+                    <option value="">--Operator Role--</option>
+                    <option value="lighting">Lighting</option>
+                    <option value="sound">Sound</option>
+                    <option value="stage">Stage</option>
+                </select>
+
+                <button class="update-btn">Update</button>
+            </form>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- ================= OPERATOR USERS ================= -->
+<div class="account-box">
+    <h3>Operator Accounts</h3>
+    {% for user in operators %}
+        <div class="account-card">
+            <strong>{{ user.username }}</strong>
+            ({{ user.operator_role }})
+
+            <form method="post" action="{% url 'update_user_role' user.id %}">
+                {% csrf_token %}
+                <select name="role">
+                    <option value="admin">Admin</option>
+                    <option value="operator" selected>Operator</option>
+                    <option value="customer">Customer</option>
+                </select>
+
+                <select name="operator_role">
+                    <option value="lighting" {% if user.operator_role == "lighting" %}selected{% endif %}>Lighting</option>
+                    <option value="sound" {% if user.operator_role == "sound" %}selected{% endif %}>Sound</option>
+                    <option value="stage" {% if user.operator_role == "stage" %}selected{% endif %}>Stage</option>
+                </select>
+
+                <button class="update-btn">Update</button>
+            </form>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- ================= CUSTOMER USERS ================= -->
+<div class="account-box">
+    <h3>Customer Accounts</h3>
+    {% for user in customers %}
+        <div class="account-card">
+            <strong>{{ user.username }}</strong>
+
+            <form method="post" action="{% url 'update_user_role' user.id %}">
+                {% csrf_token %}
+                <select name="role">
+                    <option value="admin">Admin</option>
+                    <option value="operator">Operator</option>
+                    <option value="customer" selected>Customer</option>
+                </select>
+
+                <select name="operator_role">
+                    <option value="">--Operator Role--</option>
+                    <option value="lighting">Lighting</option>
+                    <option value="sound">Sound</option>
+                    <option value="stage">Stage</option>
+                </select>
+
+                <button class="update-btn">Update</button>
+            </form>
+        </div>
+    {% endfor %}
 </div>
 
 </body>

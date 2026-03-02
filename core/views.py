@@ -9,7 +9,7 @@ from decimal import Decimal
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from datetime import timedelta
-from .models import Event, Cue, Notification, Attendance, Booking, Rating, Complaint, Salary
+from .models import Event, Cue, Notification, Attendance, Booking, Rating, Complaint, Salary, User
 from .forms import EventForm, CueForm, RatingForm, ComplaintForm, AdminReplyForm, BookingForm, CustomerRegisterForm
 
 
@@ -289,16 +289,23 @@ def admin_dashboard(request):
     total_cues = Cue.objects.count()
     total_operators = Attendance.objects.values("operator").distinct().count()
 
-    # 🔥 Get all bookings of admin's events
     bookings = Booking.objects.filter(
         event__admin=request.user
     ).select_related("event", "customer").order_by("-booking_date")
+
+    # 🔥 Get users by role
+    admins = User.objects.filter(role="admin")
+    operators = User.objects.filter(role="operator")
+    customers = User.objects.filter(role="customer")
 
     return render(request, "admin_dashboard.html", {
         "total_events": total_events,
         "total_cues": total_cues,
         "total_operators": total_operators,
         "bookings": bookings,
+        "admins": admins,
+        "operators": operators,
+        "customers": customers,
     })
 
 
@@ -706,3 +713,28 @@ def register_view(request):
         form = CustomerRegisterForm()
 
     return render(request, "register.html", {"form": form})
+
+
+@login_required
+def update_user_role(request, user_id):
+    if request.user.role != "admin":
+        return redirect("login")
+
+    user_obj = get_object_or_404(User, id=user_id)
+
+    if request.method == "POST":
+        new_role = request.POST.get("role")
+        new_operator_role = request.POST.get("operator_role")
+
+        user_obj.role = new_role
+
+        # 🔥 If role is operator → assign operator_role
+        if new_role == "operator":
+            user_obj.operator_role = new_operator_role
+        else:
+            user_obj.operator_role = None
+
+        user_obj.save()
+
+        messages.success(request, "User role updated successfully.")
+        return redirect("admin_dashboard")
