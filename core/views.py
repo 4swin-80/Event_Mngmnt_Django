@@ -328,13 +328,21 @@ def operator_dashboard(request):
 # =========================
 # EVENT CRUD
 # =========================
+
 @login_required
 def event_list(request):
     if request.user.role != "admin":
         return redirect("login")
 
-    events = Event.objects.filter(admin=request.user)
-    return render(request, "event_list.html", {"events": events})
+    events = Event.objects.filter(
+        admin=request.user
+    ).annotate(
+        avg_rating=Avg("ratings__stars")
+    )
+
+    return render(request, "event_list.html", {
+        "events": events
+    })
 
 
 @login_required

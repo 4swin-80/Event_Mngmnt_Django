@@ -66,13 +66,6 @@
 <hr>
 
 <!-- ================= EVENT INFO ================= -->
-<div class="section">
-    <p><strong>Date:</strong> {{ event.date }}</p>
-    <p><strong>Location:</strong> {{ event.location }}</p>
-    <p><strong>Status:</strong> {{ event.event_status }}</p>
-</div>
-
-<hr>
 
 <!-- ================= AVERAGE RATING ================= -->
 <div class="section">
@@ -94,7 +87,14 @@
     {% endif %}
 </div>
 
-<hr>
+<div class="section">
+    
+    <p><strong>Status:</strong> {{ event.event_status }}</p>
+
+    <p>{{ event.details|truncatechars:100 }}</p>
+
+    <p class="price">₹{{ event.price }}</p>
+</div>
 
 <!-- ================= BOOKING ================= -->
 <div class="section">

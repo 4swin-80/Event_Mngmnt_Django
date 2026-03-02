@@ -129,6 +129,23 @@
                 margin-top: 10px;
             }
         }
+        .star {
+            font-size: 16px;
+        }
+        
+        .star.full {
+            color: gold;
+        }
+        
+        .star.half {
+            background: linear-gradient(90deg, gold 50%, #ddd 50%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .star.empty {
+            color: #ddd;
+        }
     </style>
 </head>
 <body>
@@ -178,19 +195,26 @@
                     <h4>{{ event.name }}</h4>
 
                     {% if event.avg_rating %}
-                        <div class="rating">
-                            {% for i in "12345" %}
-                                {% if forloop.counter <= event.avg_rating|floatformat:0 %}
-                                    ★
-                                {% else %}
-                                    ☆
-                                {% endif %}
-                            {% endfor %}
-                            ({{ event.avg_rating|floatformat:1 }})
-                        </div>
-                    {% else %}
-                        <div>No ratings yet</div>
-                    {% endif %}
+    <div class="rating">
+
+        {% for i in "12345" %}
+            {% if forloop.counter <= event.avg_rating %}
+                <span class="star full">★</span>
+
+            {% elif forloop.counter <= event.avg_rating|add:"0.5" %}
+                <span class="star half">★</span>
+
+            {% else %}
+                <span class="star empty">★</span>
+            {% endif %}
+        {% endfor %}
+
+        ({{ event.avg_rating|floatformat:1 }})
+
+    </div>
+{% else %}
+    <div>No ratings yet</div>
+{% endif %}
 
                     <p>{{ event.details|truncatechars:100 }}</p>
 
