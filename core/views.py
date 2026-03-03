@@ -296,9 +296,9 @@ def admin_dashboard(request):
 
     total_cues = Cue.objects.count()
 
-    total_operators = Attendance.objects.values(
-        "operator"
-    ).distinct().count()
+    total_operators = Attendance.objects.filter(
+        check_out_time__isnull=True
+    ).values("operator").distinct().count()
 
     # =========================
     # Latest Bookings
