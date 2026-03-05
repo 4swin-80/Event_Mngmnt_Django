@@ -189,7 +189,7 @@
 <br>
 <br>
 <h4 class="mb-4 text-center">
-    Welcome {{ user.username }}
+    Welcome {% if user.operator_role %}{{ user.operator_role }} {% endif %}{{ user.username }}
 </h4>
 <center><hr style="width: 95%;"></center>
 <br>
