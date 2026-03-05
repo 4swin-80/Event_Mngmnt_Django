@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Chat</title>
+    <title>Chat</title>
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -26,31 +26,55 @@
 
         .chat-wrapper {
             height: calc(100vh - 70px);
+            overflow: hidden;
+        }
+
+        .chat-wrapper .row {
+            height: 100%;
+            min-height: 0;
         }
 
         .user-panel {
             background: white;
             border-right: 1px solid #eee;
             overflow-y: auto;
+            height: 100%;
+            min-height: 0;
         }
 
         .chat-panel {
             background: #fafafa;
             display: flex;
             flex-direction: column;
+            height: 100%;
+            min-height: 0;
         }
 
         .message-area {
-            flex: 1;
+            flex: 1 1 auto;
+            min-height: 0;
             overflow-y: auto;
             padding: 20px;
+        }
+
+        .message-row {
+            display: flex;
+            margin-bottom: 12px;
+        }
+
+        .sent-row {
+            justify-content: flex-end;
+        }
+
+        .received-row {
+            justify-content: flex-start;
         }
 
         .message {
             padding: 10px 14px;
             border-radius: 18px;
-            margin-bottom: 12px;
             max-width: 65%;
+            word-break: break-word;
         }
 
         .sent {
@@ -67,7 +91,26 @@
         .msg-time {
             font-size: 11px;
             opacity: 0.7;
+        }
+
+        .msg-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             margin-top: 4px;
+        }
+
+        .delete-msg-btn {
+            border: 0;
+            background: transparent;
+            color: #dc3545;
+            padding: 0;
+            font-size: 11px;
+            text-decoration: underline;
+        }
+
+        .delete-msg-btn:hover {
+            color: #b02a37;
         }
 
         .chat-input {
@@ -103,6 +146,29 @@
             border-radius: 50%;
             margin-left: 6px;
         }
+
+        @media (max-width: 767.98px) {
+            body {
+                overflow: auto;
+            }
+
+            .chat-wrapper {
+                height: auto;
+                min-height: calc(100vh - 70px);
+            }
+
+            .user-panel {
+                max-height: 35vh;
+            }
+
+            .chat-panel {
+                min-height: 60vh;
+            }
+
+            .message {
+                max-width: 82%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -113,7 +179,7 @@
         <span class="navbar-brand fw-semibold">NexEvent</span>
 
         <div class="d-flex gap-3">
-            <a href="{% url 'admin_dashboard' %}" class="text-decoration-none">Dashboard</a>
+            <a href="{% url dashboard_url_name %}" class="text-decoration-none">Dashboard</a>
             <a href="{% url 'logout' %}" class="text-danger text-decoration-none">Logout</a>
         </div>
     </div>
@@ -154,13 +220,23 @@
                 </div>
 
                 <!-- Messages -->
-                <div class="message-area">
+                <div class="message-area" id="messageArea">
 
                     {% for msg in messages %}
-                        <div class="message {% if msg.sender == request.user %}sent{% else %}received{% endif %}">
-                            <div>{{ msg.message }}</div>
-                            <div class="msg-time">
-                                {{ msg.created_at|date:"d M Y, h:i A" }}
+                        <div class="message-row {% if msg.sender == request.user %}sent-row{% else %}received-row{% endif %}">
+                            <div class="message {% if msg.sender == request.user %}sent{% else %}received{% endif %}">
+                                <div>{{ msg.message }}</div>
+                                <div class="msg-meta">
+                                    <div class="msg-time">
+                                        {{ msg.created_at|date:"d M Y, h:i A" }}
+                                    </div>
+                                    <form method="post" action="{% url 'delete_message' msg.id %}" class="m-0">
+                                        {% csrf_token %}
+                                        <button type="submit" class="delete-msg-btn" onclick="return confirm('Delete this message?');">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     {% empty %}
@@ -201,6 +277,14 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const messageArea = document.getElementById("messageArea");
+    if (messageArea) {
+        messageArea.scrollTop = messageArea.scrollHeight;
+    }
+});
+</script>
 
 </body>
 </html>

@@ -816,8 +816,10 @@ def chat_view(request):
     # 🔥 Determine opposite users
     if request.user.role == "admin":
         users = User.objects.filter(role="operator")
+        dashboard_url_name = "admin_dashboard"
     else:
         users = User.objects.filter(role="admin")
+        dashboard_url_name = "operator_dashboard"
 
     selected_user_id = request.GET.get("user")
     selected_user = None
@@ -830,7 +832,7 @@ def chat_view(request):
     ).values_list("sender_id", flat=True).distinct()
 
     if selected_user_id:
-        selected_user = get_object_or_404(User, id=selected_user_id)
+        selected_user = get_object_or_404(users, id=selected_user_id)
 
         messages = ChatMessage.objects.filter(
             sender__in=[request.user, selected_user],
@@ -848,7 +850,8 @@ def chat_view(request):
         "users": users,
         "messages": messages,
         "selected_user": selected_user,
-        "unread_senders": unread_senders
+        "unread_senders": unread_senders,
+        "dashboard_url_name": dashboard_url_name,
     })
 
 
@@ -856,10 +859,16 @@ def chat_view(request):
 @login_required
 def send_message(request, user_id):
 
-    receiver = get_object_or_404(User, id=user_id)
+    if request.user.role not in ["admin", "operator"]:
+        return redirect("login")
+
+    if request.user.role == "admin":
+        receiver = get_object_or_404(User, id=user_id, role="operator")
+    else:
+        receiver = get_object_or_404(User, id=user_id, role="admin")
 
     if request.method == "POST":
-        message_text = request.POST.get("message")
+        message_text = (request.POST.get("message") or "").strip()
 
         if message_text:
             ChatMessage.objects.create(
@@ -869,3 +878,24 @@ def send_message(request, user_id):
             )
 
     return redirect(f"/chat/?user={receiver.id}")
+
+
+@login_required
+@require_POST
+def delete_message(request, message_id):
+
+    if request.user.role not in ["admin", "operator"]:
+        return redirect("login")
+
+    chat_message = get_object_or_404(ChatMessage, id=message_id)
+
+    if request.user not in [chat_message.sender, chat_message.receiver]:
+        return redirect("chat")
+
+    if chat_message.sender == request.user:
+        other_user = chat_message.receiver
+    else:
+        other_user = chat_message.sender
+
+    chat_message.delete()
+    return redirect(f"/chat/?user={other_user.id}")

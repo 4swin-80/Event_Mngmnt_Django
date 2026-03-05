@@ -47,4 +47,5 @@ urlpatterns = [
     path('about-us/', views.about_us, name='about_us'),
     path('chat/', views.chat_view, name='chat'),
     path('send-message/<int:user_id>/', views.send_message, name='send_message'),
+    path('delete-message/<int:message_id>/', views.delete_message, name='delete_message'),
 ]
