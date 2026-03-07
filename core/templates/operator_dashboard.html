@@ -77,6 +77,17 @@
             border-radius: 6px;
         }
 
+        .cue-countdown {
+            background: #fff4e6;
+            border-left: 4px solid #fd7e14;
+            padding: 8px 10px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            border-radius: 6px;
+            color: #7a3e00;
+            font-weight: 600;
+        }
+
         .btn-rounded {
             border-radius: 25px;
             padding: 6px 18px;
@@ -265,6 +276,13 @@
                     </div>
                 {% endif %}
 
+                <div class="cue-countdown countdown-item"
+                     data-cue-date="{{ cue.cue_date|date:'Y-m-d' }}"
+                     data-cue-time="{{ cue.cue_time|time:'H:i:s' }}"
+                     data-pre-alert="{{ cue.pre_alert_sec }}">
+                    Countdown: 00:00:00
+                </div>
+
                 <a href="{% url 'complete_cue' cue.id %}"
                    class="btn btn-dark btn-sm btn-rounded">
                     ✅ Mark Completed
@@ -391,6 +409,59 @@ document.addEventListener("DOMContentLoaded", function () {
         updateTimer();
         setInterval(updateTimer, 1000);
     {% endif %}
+
+    /* ==============================
+       Cue Countdown Timers
+    ============================== */
+    const cueCountdownElements = document.querySelectorAll(".countdown-item");
+
+    function formatCountdown(ms) {
+        const totalSeconds = Math.floor(ms / 1000);
+        const days = Math.floor(totalSeconds / 86400);
+        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        const hh = String(hours).padStart(2, "0");
+        const mm = String(minutes).padStart(2, "0");
+        const ss = String(seconds).padStart(2, "0");
+
+        if (days > 0) {
+            return `${days}d ${hh}:${mm}:${ss}`;
+        }
+        return `${hh}:${mm}:${ss}`;
+    }
+
+    function updateCueCountdowns() {
+        const now = new Date();
+
+        cueCountdownElements.forEach((element) => {
+            const cueDate = element.dataset.cueDate;
+            const cueTime = element.dataset.cueTime;
+            const preAlertSec = parseInt(element.dataset.preAlert || "0", 10);
+
+            const cueDateTime = new Date(`${cueDate}T${cueTime}`);
+            const alertDateTime = new Date(cueDateTime.getTime() - (preAlertSec * 1000));
+            const diff = alertDateTime - now;
+
+            if (Number.isNaN(cueDateTime.getTime())) {
+                element.textContent = "Countdown: Invalid cue date/time";
+                return;
+            }
+
+            if (diff <= 0) {
+                element.textContent = "Countdown: Alert time reached";
+                return;
+            }
+
+            element.textContent = `Countdown: ${formatCountdown(diff)}`;
+        });
+    }
+
+    if (cueCountdownElements.length > 0) {
+        updateCueCountdowns();
+        setInterval(updateCueCountdowns, 1000);
+    }
 
 });
 </script>
