@@ -1,5 +1,6 @@
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django import forms
+from django.utils import timezone
 from .models import Event, Cue, Rating, Complaint, Booking, User
 
 
@@ -66,8 +67,10 @@ class CueForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         event_id = kwargs.pop('event_id', None)
         super().__init__(*args, **kwargs)
+        today = timezone.localdate().isoformat()
 
         self.fields['operator'].queryset = User.objects.filter(role='operator')
+        self.fields['cue_date'].widget.attrs['min'] = today
 
         self.fields['operator'].label_from_instance = (
             lambda obj: f"{obj.operator_role} - {obj.username}"
@@ -76,6 +79,14 @@ class CueForm(forms.ModelForm):
         if event_id:
             self.fields['event'].initial = event_id
             self.fields['event'].widget.attrs['readonly'] = True
+
+    def clean_cue_date(self):
+        cue_date = self.cleaned_data.get('cue_date')
+        if cue_date and cue_date < timezone.localdate():
+            raise forms.ValidationError(
+                "Past dates are not allowed. Please select today or a future date."
+            )
+        return cue_date
 
 
 class LoginForm(AuthenticationForm):
