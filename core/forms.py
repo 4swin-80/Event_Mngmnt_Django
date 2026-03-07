@@ -21,11 +21,43 @@ class BookingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        today = timezone.localdate().isoformat()
+
+        self.fields["customer_name"].required = True
+        self.fields["location"].required = True
+        self.fields["email"].required = True
+        self.fields["mobile"].required = True
+        self.fields["event_date"].required = True
+        self.fields["event_date"].widget.attrs["min"] = today
 
         for field in self.fields.values():
             field.widget.attrs.update({
                 'class': 'form-control form-control-lg'
             })
+
+    def clean_customer_name(self):
+        name = (self.cleaned_data.get("customer_name") or "").strip()
+        if not name:
+            raise forms.ValidationError("Name is required.")
+        return name
+
+    def clean_location(self):
+        location = (self.cleaned_data.get("location") or "").strip()
+        if not location:
+            raise forms.ValidationError("Location is required.")
+        return location
+
+    def clean_mobile(self):
+        mobile = (self.cleaned_data.get("mobile") or "").strip()
+        if not mobile.isdigit() or len(mobile) != 10:
+            raise forms.ValidationError("Mobile number must be exactly 10 digits.")
+        return mobile
+
+    def clean_event_date(self):
+        event_date = self.cleaned_data.get("event_date")
+        if event_date and event_date < timezone.localdate():
+            raise forms.ValidationError("Event date cannot be in the past.")
+        return event_date
 
 class CueForm(forms.ModelForm):
 

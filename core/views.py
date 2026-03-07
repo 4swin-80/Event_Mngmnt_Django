@@ -253,7 +253,11 @@ def my_bookings(request):
     if request.user.role != "customer":
         return redirect("login")
 
-    bookings = Booking.objects.filter(customer=request.user)
+    bookings = Booking.objects.filter(
+        customer=request.user
+    ).exclude(
+        approval_status="Rejected"
+    )
     return render(request, "my_bookings.html", {
         "bookings": bookings
     })
@@ -321,6 +325,8 @@ def admin_dashboard(request):
     # =========================
     bookings = Booking.objects.filter(
         event__admin=request.user
+    ).exclude(
+        approval_status="Rejected"
     ).select_related(
         "event", "customer"
     ).annotate(
