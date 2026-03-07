@@ -88,6 +88,42 @@
             font-weight: 600;
         }
 
+        .countdown-label {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .countdown-bar {
+            height: 8px;
+            width: 100%;
+            background: #ffe8cc;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .countdown-fill {
+            width: 100%;
+            height: 100%;
+            background: #22c55e;
+            border-radius: 999px;
+            transition: width 1s linear, background-color 500ms ease;
+        }
+
+        .countdown-critical .countdown-fill {
+            animation: countdownPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes countdownPulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.2);
+                filter: brightness(1);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
+                filter: brightness(1.15);
+            }
+        }
+
         .btn-rounded {
             border-radius: 25px;
             padding: 6px 18px;
@@ -254,6 +290,13 @@
 
 </div>
 
+<!-- Live Alerts -->
+<div class="card-panel">
+    <h5 class="mb-3 text-center">Live Alerts</h5>
+    <div id="alerts"></div>
+</div>
+<br>
+
     <!-- Pending Cues -->
     <div class="card-panel mb-4">
         <h5 class="mb-4 text-center">Pending Cues</h5>
@@ -280,7 +323,10 @@
                      data-cue-date="{{ cue.cue_date|date:'Y-m-d' }}"
                      data-cue-time="{{ cue.cue_time|time:'H:i:s' }}"
                      data-pre-alert="{{ cue.pre_alert_sec }}">
-                    Countdown: 00:00:00
+                    <span class="countdown-label">Countdown: 00:00:00</span>
+                    <div class="countdown-bar">
+                        <div class="countdown-fill"></div>
+                    </div>
                 </div>
 
                 <a href="{% url 'complete_cue' cue.id %}"
@@ -293,12 +339,6 @@
         {% empty %}
             <p class="text-muted">No pending cues.</p>
         {% endfor %}
-    </div>
-
-    <!-- Live Alerts -->
-    <div class="card-panel">
-        <h5 class="mb-3 text-center">Live Alerts</h5>
-        <div id="alerts"></div>
     </div>
 
 </div>
@@ -436,6 +476,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const now = new Date();
 
         cueCountdownElements.forEach((element) => {
+            const label = element.querySelector(".countdown-label");
+            const fill = element.querySelector(".countdown-fill");
             const cueDate = element.dataset.cueDate;
             const cueTime = element.dataset.cueTime;
             const preAlertSec = parseInt(element.dataset.preAlert || "0", 10);
@@ -445,16 +487,57 @@ document.addEventListener("DOMContentLoaded", function () {
             const diff = alertDateTime - now;
 
             if (Number.isNaN(cueDateTime.getTime())) {
-                element.textContent = "Countdown: Invalid cue date/time";
+                if (label) {
+                    label.textContent = "Countdown: Invalid cue date/time";
+                }
+                if (fill) {
+                    fill.style.width = "0%";
+                    fill.style.backgroundColor = "#dc2626";
+                }
+                element.classList.remove("countdown-critical");
                 return;
             }
+
+            if (!element.dataset.initialMs) {
+                element.dataset.initialMs = String(Math.max(diff, 1000));
+            }
+
+            const initialMs = parseInt(element.dataset.initialMs, 10) || 1000;
+            const ratio = Math.max(0, Math.min(1, diff / initialMs));
 
             if (diff <= 0) {
-                element.textContent = "Countdown: Alert time reached";
+                if (label) {
+                    label.textContent = "Countdown: Alert time reached";
+                }
+                if (fill) {
+                    fill.style.width = "0%";
+                    fill.style.backgroundColor = "#dc2626";
+                }
+                element.classList.remove("countdown-critical");
                 return;
             }
 
-            element.textContent = `Countdown: ${formatCountdown(diff)}`;
+            if (label) {
+                label.textContent = `Countdown: ${formatCountdown(diff)}`;
+            }
+
+            if (fill) {
+                fill.style.width = `${ratio * 100}%`;
+
+                let color = "#22c55e";
+                if (ratio <= 0.2) {
+                    color = "#dc2626";
+                } else if (ratio <= 0.5) {
+                    color = "#f59e0b";
+                }
+                fill.style.backgroundColor = color;
+            }
+
+            if (diff <= 15000) {
+                element.classList.add("countdown-critical");
+            } else {
+                element.classList.remove("countdown-critical");
+            }
         });
     }
 
