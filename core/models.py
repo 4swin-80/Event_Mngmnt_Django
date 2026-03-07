@@ -208,6 +208,11 @@ class Notification(models.Model):
 # Booking Model
 # =========================
 class Booking(models.Model):
+    APPROVAL_STATUS_CHOICES = (
+        ("Pending", "Pending"),
+        ("Accepted", "Accepted"),
+        ("Rejected", "Rejected"),
+    )
 
     customer = models.ForeignKey(
         User,
@@ -227,6 +232,13 @@ class Booking(models.Model):
     email = models.EmailField(null=True, blank=True)
     event_date = models.DateField(null=True, blank=True)
 
+    approval_status = models.CharField(
+        max_length=20,
+        choices=APPROVAL_STATUS_CHOICES,
+        default="Pending",
+    )
+    admin_action_at = models.DateTimeField(null=True, blank=True)
+    customer_notified = models.BooleanField(default=True)
     booking_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

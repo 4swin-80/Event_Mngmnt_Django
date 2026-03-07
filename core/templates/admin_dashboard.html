@@ -74,6 +74,30 @@
             padding: 6px 18px;
         }
 
+        .status-pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #7a5a00;
+        }
+
+        .status-accepted {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #842029;
+        }
+
         select {
             border-radius: 10px !important;
         }
@@ -95,6 +119,13 @@
 <h4 class="mb-4 text-center">Welcome {{ user.username }}</h4>
 
 <div class="container-fluid px-4 mt-4 text-center">
+    {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} mb-2">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
     <!-- Navigation Links -->
     <div class="mb-4">
@@ -147,12 +178,29 @@
                 <h6>{{ booking.customer_name }}</h6>
                 <p class="mb-1"><strong>Event:</strong> {{ booking.event.name }}</p>
                 <p class="mb-1"><strong>Date:</strong> {{ booking.event_date }}</p>
-                <p><strong>Location:</strong> {{ booking.location }}</p>
+                <p class="mb-2"><strong>Location:</strong> {{ booking.location }}</p>
+
+                <div>
+                    <span class="status-pill
+                        {% if booking.approval_status == 'Accepted' %}status-accepted
+                        {% elif booking.approval_status == 'Rejected' %}status-rejected
+                        {% else %}status-pending{% endif %}">
+                        {{ booking.approval_status }}
+                    </span>
+                </div>
 
                 <a href="{% url 'booking_detail' booking.id %}"
-                   class="btn btn-dark btn-sm btn-rounded">
+                   class="btn btn-dark btn-sm btn-rounded mb-2">
                     View Details
                 </a>
+
+                {% if booking.approval_status == "Pending" %}
+                    <form method="post" action="{% url 'update_booking_status' booking.id %}" class="d-flex gap-2 justify-content-center">
+                        {% csrf_token %}
+                        <button type="submit" name="action" value="accept" class="btn btn-success btn-sm btn-rounded">Accept</button>
+                        <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm btn-rounded">Reject</button>
+                    </form>
+                {% endif %}
             </div>
         </div>
         {% empty %}

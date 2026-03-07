@@ -69,6 +69,18 @@
             <div class="form-card">
 
                 <h4 class="mb-4 text-center">Create Cue</h4>
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags|default:'info' }} mb-3">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger mb-3">
+                        {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
 
                 <form method="post">
                     {% csrf_token %}
@@ -76,6 +88,9 @@
                     <div class="mb-3">
                         {{ form.event.label_tag }}
                         {{ form.event }}
+                        {% for error in form.event.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
                     </div>
 
                     <div class="mb-3">

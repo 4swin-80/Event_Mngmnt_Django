@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.db.models import Count, Avg, Sum
+from django.db.models import Count, Avg, Sum, Case, When, IntegerField
 from django import forms
 from django.contrib import messages
 from decimal import Decimal
@@ -27,7 +27,8 @@ def booking_detail(request, pk):
     )
 
     return render(request, "booking_detail.html", {
-        "booking": booking
+        "booking": booking,
+        "can_create_cue": booking.approval_status == "Accepted",
     })
 
 
@@ -189,9 +190,24 @@ def customer_dashboard(request):
         reply_seen=False
     ).count()
 
+    booking_notifications = list(
+        Booking.objects.filter(
+            customer=request.user,
+            customer_notified=False
+        )
+        .exclude(approval_status="Pending")
+        .select_related("event")
+        .order_by("-admin_action_at")
+    )
+    if booking_notifications:
+        Booking.objects.filter(
+            id__in=[booking.id for booking in booking_notifications]
+        ).update(customer_notified=True)
+
     return render(request, "customer_dashboard.html", {
         "events": events,
-        "unread_replies": unread_replies
+        "unread_replies": unread_replies,
+        "booking_notifications": booking_notifications,
     })
 
 
@@ -307,7 +323,15 @@ def admin_dashboard(request):
         event__admin=request.user
     ).select_related(
         "event", "customer"
-    ).order_by("-booking_date")
+    ).annotate(
+        status_priority=Case(
+            When(approval_status="Pending", then=0),
+            When(approval_status="Accepted", then=1),
+            When(approval_status="Rejected", then=2),
+            default=3,
+            output_field=IntegerField(),
+        )
+    ).order_by("status_priority", "-booking_date")
 
     # =========================
     # User Management Lists
@@ -341,11 +365,39 @@ def admin_dashboard(request):
     })
 
 
+@login_required
+@require_POST
+def update_booking_status(request, pk):
+    if request.user.role != "admin":
+        return redirect("login")
+
+    booking = get_object_or_404(
+        Booking,
+        id=pk,
+        event__admin=request.user,
+    )
+
+    action = request.POST.get("action", "").strip().lower()
+    if action not in {"accept", "reject"}:
+        messages.error(request, "Invalid booking action.")
+        return redirect("admin_dashboard")
+
+    booking.approval_status = "Accepted" if action == "accept" else "Rejected"
+    booking.admin_action_at = timezone.now()
+    booking.customer_notified = False
+    booking.save(update_fields=["approval_status", "admin_action_at", "customer_notified"])
+
+    messages.success(
+        request,
+        f"Booking for {booking.customer.username} has been {booking.approval_status.lower()}."
+    )
+    return redirect("admin_dashboard")
+
+
 # =========================
 # OPERATOR DASHBOARD
 # =========================
 from .models import Attendance
-from django.utils import timezone
 
 @login_required
 def operator_dashboard(request):
@@ -480,14 +532,48 @@ def cue_create(request):
         return redirect("login")
 
     event_id = request.GET.get("event_id")
+    booking_id = request.GET.get("booking_id")
+    allowed_events = Event.objects.filter(
+        admin=request.user,
+        bookings__approval_status="Accepted",
+    ).distinct()
+    allowed_event_ids = set(allowed_events.values_list("id", flat=True))
+
+    if booking_id:
+        booking = get_object_or_404(
+            Booking,
+            id=booking_id,
+            event__admin=request.user,
+        )
+        if booking.approval_status != "Accepted":
+            messages.error(request, "You can create cues only after booking is accepted.")
+            return redirect("booking_detail", pk=booking.id)
+        event_id = str(booking.event_id)
+
+    if event_id:
+        try:
+            event_id_int = int(event_id)
+        except (TypeError, ValueError):
+            messages.error(request, "Invalid event selected for cue creation.")
+            return redirect("admin_dashboard")
+        if event_id_int not in allowed_event_ids:
+            messages.error(request, "Cues can be created only for accepted bookings.")
+            return redirect("admin_dashboard")
 
     if request.method == "POST":
-        form = CueForm(request.POST, event_id=event_id)
+        form = CueForm(request.POST, event_id=event_id, admin_user=request.user)
         if form.is_valid():
-            form.save()
-            return redirect("cue_list")
+            selected_event = form.cleaned_data["event"]
+            if selected_event.id not in allowed_event_ids:
+                form.add_error("event", "This event is not approved for cue creation.")
+            else:
+                form.save()
+                return redirect("cue_list")
     else:
-        form = CueForm(event_id=event_id)
+        form = CueForm(event_id=event_id, admin_user=request.user)
+        if not form.fields["event"].queryset.exists():
+            messages.info(request, "No accepted bookings found. Accept a booking to create cues.")
+            return redirect("admin_dashboard")
 
     return render(request, "cue_form.html", {"form": form})
 

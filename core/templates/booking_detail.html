@@ -48,6 +48,29 @@
         .info-row {
             margin-bottom: 10px;
         }
+
+        .status-pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #7a5a00;
+        }
+
+        .status-accepted {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #842029;
+        }
     </style>
 </head>
 <body>
@@ -75,6 +98,13 @@
         <div class="col-lg-7">
 
             <div class="detail-card">
+                {% if messages %}
+                    <div class="mb-3">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags|default:'info' }} mb-2">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
 
                 <h4 class="mb-4 text-center">Booking Details</h4>
                 <hr>
@@ -125,11 +155,38 @@
                     {{ booking.booking_date }}
                 </div>
 
+                <div class="info-row">
+                    <span class="info-label">Approval Status:</span>
+                    <span class="status-pill
+                        {% if booking.approval_status == 'Accepted' %}status-accepted
+                        {% elif booking.approval_status == 'Rejected' %}status-rejected
+                        {% else %}status-pending{% endif %}">
+                        {{ booking.approval_status }}
+                    </span>
+                </div>
+
+                {% if booking.approval_status == "Pending" %}
+                    <div class="text-center mt-4 d-flex justify-content-center gap-2">
+                        <form method="post" action="{% url 'update_booking_status' booking.id %}">
+                            {% csrf_token %}
+                            <button type="submit" name="action" value="accept" class="btn btn-success btn-rounded">Accept</button>
+                        </form>
+                        <form method="post" action="{% url 'update_booking_status' booking.id %}">
+                            {% csrf_token %}
+                            <button type="submit" name="action" value="reject" class="btn btn-danger btn-rounded">Reject</button>
+                        </form>
+                    </div>
+                {% endif %}
+
                 <div class="text-center mt-4">
-                    <a href="{% url 'cue_create' %}?event_id={{ booking.event.id }}"
-                       class="btn btn-dark btn-rounded">
-                        Create Cue
-                    </a>
+                    {% if can_create_cue %}
+                        <a href="{% url 'cue_create' %}?booking_id={{ booking.id }}"
+                           class="btn btn-dark btn-rounded">
+                            Create Cue
+                        </a>
+                    {% else %}
+                        <span class="text-muted">Create Cue is enabled only after booking is accepted.</span>
+                    {% endif %}
                 </div>
 
             </div>

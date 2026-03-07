@@ -89,6 +89,23 @@
             font-weight: 500;
         }
 
+        .booking-notification {
+            border-radius: 12px;
+            padding: 12px 18px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .booking-accepted {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .booking-rejected {
+            background: #f8d7da;
+            color: #842029;
+        }
+
         /* Footer */
         footer {
             background: #ffffff;
@@ -163,6 +180,17 @@
         <div class="notification-box mb-4">
             🔔 You have {{ unread_replies }} new admin reply!
             <a href="{% url 'view_complaints' %}" class="ms-2 fw-semibold">View Now</a>
+        </div>
+    {% endif %}
+
+    {% if booking_notifications %}
+        <div class="mb-4">
+            {% for booking in booking_notifications %}
+                <div class="booking-notification {% if booking.approval_status == 'Accepted' %}booking-accepted{% else %}booking-rejected{% endif %}">
+                    Booking update for <strong>{{ booking.event.name }}</strong>:
+                    Your booking was <strong>{{ booking.approval_status|lower }}</strong>.
+                </div>
+            {% endfor %}
         </div>
     {% endif %}
 

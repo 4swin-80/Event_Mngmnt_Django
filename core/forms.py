@@ -66,11 +66,21 @@ class CueForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         event_id = kwargs.pop('event_id', None)
+        admin_user = kwargs.pop("admin_user", None)
         super().__init__(*args, **kwargs)
         today = timezone.localdate().isoformat()
 
         self.fields['operator'].queryset = User.objects.filter(role='operator')
         self.fields['cue_date'].widget.attrs['min'] = today
+        if admin_user:
+            self.fields["event"].queryset = (
+                Event.objects.filter(
+                    admin=admin_user,
+                    bookings__approval_status="Accepted",
+                )
+                .distinct()
+                .order_by("name")
+            )
 
         self.fields['operator'].label_from_instance = (
             lambda obj: f"{obj.operator_role} - {obj.username}"
