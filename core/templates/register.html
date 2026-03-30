@@ -263,11 +263,11 @@ document.addEventListener("DOMContentLoaded", function () {
         x: window.innerWidth / 2,
         y: window.innerHeight / 2,
         active: false,
-        radius: 150
+        radius: 220
     };
 
     const particles = [];
-    const particleCount = 90;
+    const particleCount = 160;
 
     function resizeCanvas() {
         const dpr = window.devicePixelRatio || 1;
@@ -284,10 +284,10 @@ document.addEventListener("DOMContentLoaded", function () {
             particles.push({
                 x: Math.random() * window.innerWidth,
                 y: Math.random() * window.innerHeight,
-                vx: (Math.random() - 0.5) * 0.5,
-                vy: (Math.random() - 0.5) * 0.5,
-                size: 1 + Math.random() * 2.8,
-                alpha: 0.22 + Math.random() * 0.28,
+                vx: (Math.random() - 0.5) * 0.28,
+                vy: (Math.random() - 0.5) * 0.28,
+                size: 1.2 + Math.random() * 3.6,
+                alpha: 0.26 + Math.random() * 0.34,
             });
         }
     }
@@ -301,9 +301,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 const dy = a.y - b.y;
                 const distance = Math.sqrt((dx * dx) + (dy * dy));
 
-                if (distance < 120) {
-                    const opacity = (1 - distance / 120) * 0.12;
-                    ctx.strokeStyle = `rgba(116, 79, 45, ${opacity})`;
+                if (distance < 165) {
+                    const opacity = (1 - distance / 165) * 0.16;
+                    ctx.strokeStyle = `rgba(96, 63, 38, ${opacity})`;
                     ctx.lineWidth = 1;
                     ctx.beginPath();
                     ctx.moveTo(a.x, a.y);
@@ -323,9 +323,10 @@ document.addEventListener("DOMContentLoaded", function () {
             0,
             pointer.x,
             pointer.y,
-            280
+            360
         );
-        gradient.addColorStop(0, "rgba(211, 95, 54, 0.18)");
+        gradient.addColorStop(0, "rgba(211, 95, 54, 0.24)");
+        gradient.addColorStop(0.4, "rgba(168, 101, 72, 0.12)");
         gradient.addColorStop(1, "rgba(211, 95, 54, 0)");
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
@@ -337,7 +338,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const distance = Math.sqrt((dx * dx) + (dy * dy)) || 1;
 
                 if (distance < pointer.radius) {
-                    const pull = (1 - distance / pointer.radius) * 0.035;
+                    const pull = (1 - distance / pointer.radius) * 0.045;
                     particle.vx += (dx / distance) * pull;
                     particle.vy += (dy / distance) * pull;
                 }
@@ -345,8 +346,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
             particle.x += particle.vx;
             particle.y += particle.vy;
-            particle.vx *= 0.985;
-            particle.vy *= 0.985;
+            particle.vx *= 0.992;
+            particle.vy *= 0.992;
 
             if (particle.x < -40) particle.x = window.innerWidth + 40;
             if (particle.x > window.innerWidth + 40) particle.x = -40;
