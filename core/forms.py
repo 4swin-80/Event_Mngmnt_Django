@@ -66,6 +66,7 @@ class CueForm(forms.ModelForm):
         fields = [
             'event',
             'operator',
+            'backup_operators',
             'cue_date',
             'cue_time',
             'cue_action',
@@ -75,6 +76,7 @@ class CueForm(forms.ModelForm):
         widgets = {
             'event': forms.Select(attrs={'class': 'form-select'}),
             'operator': forms.Select(attrs={'class': 'form-select'}),
+            'backup_operators': forms.CheckboxSelectMultiple(),
             'cue_date': forms.DateInput(attrs={
                 'type': 'date',
                 'class': 'form-control'
@@ -103,6 +105,7 @@ class CueForm(forms.ModelForm):
         today = timezone.localdate().isoformat()
 
         self.fields['operator'].queryset = User.objects.filter(role='operator')
+        self.fields['backup_operators'].queryset = User.objects.filter(role='operator')
         self.fields['cue_date'].widget.attrs['min'] = today
         if admin_user:
             self.fields["event"].queryset = (
@@ -117,6 +120,11 @@ class CueForm(forms.ModelForm):
         self.fields['operator'].label_from_instance = (
             lambda obj: f"{obj.operator_role} - {obj.username}"
         )
+        self.fields['backup_operators'].label_from_instance = (
+            lambda obj: f"{obj.operator_role} - {obj.username}"
+        )
+        self.fields['backup_operators'].required = False
+        self.fields['backup_operators'].label = "Add Backup operators"
 
         if event_id:
             self.fields['event'].initial = event_id
@@ -129,6 +137,19 @@ class CueForm(forms.ModelForm):
                 "Past dates are not allowed. Please select today or a future date."
             )
         return cue_date
+
+    def clean(self):
+        cleaned_data = super().clean()
+        operator = cleaned_data.get("operator")
+        backup_operators = cleaned_data.get("backup_operators")
+
+        if operator and backup_operators and operator in backup_operators:
+            self.add_error(
+                "backup_operators",
+                "Primary operator cannot also be selected as a backup operator."
+            )
+
+        return cleaned_data
 
 
 class LoginForm(AuthenticationForm):

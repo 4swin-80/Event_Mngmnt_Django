@@ -96,6 +96,19 @@
                     <div class="mb-3">
                         {{ form.operator.label_tag }}
                         {{ form.operator }}
+                        {% for error in form.operator.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.backup_operators.label_tag }}
+                        <div class="border rounded-4 p-3 bg-light-subtle">
+                            {{ form.backup_operators }}
+                        </div>
+                        {% for error in form.backup_operators.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
                     </div>
 
                     <div class="mb-3">
@@ -140,6 +153,36 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const operatorSelect = document.getElementById("id_operator");
+    const backupCheckboxes = document.querySelectorAll("input[name='backup_operators']");
+
+    function syncBackupOperatorChoices() {
+        const selectedOperatorId = operatorSelect ? operatorSelect.value : "";
+
+        backupCheckboxes.forEach((checkbox) => {
+            const label = checkbox.closest("label");
+            const isPrimaryOperator = checkbox.value === selectedOperatorId;
+
+            checkbox.disabled = isPrimaryOperator;
+            if (isPrimaryOperator) {
+                checkbox.checked = false;
+            }
+
+            if (label) {
+                label.classList.toggle("text-muted", isPrimaryOperator);
+                label.classList.toggle("opacity-50", isPrimaryOperator);
+            }
+        });
+    }
+
+    if (operatorSelect) {
+        operatorSelect.addEventListener("change", syncBackupOperatorChoices);
+        syncBackupOperatorChoices();
+    }
+});
+</script>
 
 </body>
 </html>

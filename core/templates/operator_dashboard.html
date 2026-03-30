@@ -353,6 +353,12 @@
                     <span class="cue-time">({{ cue.cue_time }})</span>
                 </div>
 
+                {% if cue.operator_id != user.id %}
+                    <div class="cue-note">
+                        Missed by primary operator {{ cue.operator.username }}. You are receiving this as a backup operator.
+                    </div>
+                {% endif %}
+
                 {% if cue.note %}
                     <div class="cue-note">
                         📝 {{ cue.note }}
@@ -371,7 +377,7 @@
 
                 <a href="{% url 'complete_cue' cue.id %}"
                    class="btn btn-dark btn-sm btn-rounded">
-                    ✅ Mark Completed
+                    Acknowledge Cue
                 </a>
 
             </div>

@@ -91,6 +91,23 @@
                 </h6>
 
                 <p class="mb-1">
+                    <strong>Type:</strong> {{ n.get_notification_type_display }}
+                </p>
+
+                <p class="mb-1">
+                    <strong>Recipient:</strong>
+                    {% if n.recipient %}
+                        {{ n.recipient.username }}
+                    {% else %}
+                        System
+                    {% endif %}
+                </p>
+
+                <p class="mb-1">
+                    <strong>Message:</strong> {{ n.alert_message }}
+                </p>
+
+                <p class="mb-1">
                     <strong>Alert Time:</strong> {{ n.alert_time }}
                 </p>
 

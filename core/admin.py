@@ -52,7 +52,17 @@ class ScriptAdmin(admin.ModelAdmin):
 # =========================
 @admin.register(Cue)
 class CueAdmin(admin.ModelAdmin):
-    list_display = ("cue_action", "event", "operator", "cue_date", "cue_time", "cue_status")
+    list_display = (
+        "cue_action",
+        "event",
+        "operator",
+        "cue_date",
+        "cue_time",
+        "cue_status",
+        "alert_sent_at",
+        "acknowledged_at",
+        "escalation_triggered_at",
+    )
     list_filter = ("cue_status",)
     search_fields = ("cue_action",)
 
@@ -71,8 +81,8 @@ class AttendanceAdmin(admin.ModelAdmin):
 # =========================
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ("cue", "alert_time", "alert_status")
-    list_filter = ("alert_status",)
+    list_display = ("cue", "recipient", "notification_type", "alert_time", "alert_status")
+    list_filter = ("alert_status", "notification_type")
 
 
 @admin.register(Booking)

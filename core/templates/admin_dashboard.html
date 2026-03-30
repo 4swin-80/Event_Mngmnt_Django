@@ -132,7 +132,9 @@
         <a href="{% url 'admin_dashboard' %}" class="btn btn-dark btn-rounded me-2">Dashboard</a>
         <a href="{% url 'event_list' %}" class="btn btn-outline-dark btn-rounded me-2">Events</a>
         <a href="{% url 'cue_list' %}" class="btn btn-outline-dark btn-rounded me-2">Cues</a>
-        <a href="{% url 'notification_list' %}" class="btn btn-outline-dark btn-rounded me-2">Notifications</a>
+        <a href="{% url 'notification_list' %}" class="btn btn-outline-dark btn-rounded me-2">
+            Notifications {% if escalation_notification_count > 0 %}<span class="text-danger">●</span>{% endif %}
+        </a>
         <a href="{% url 'attendance' %}" class="btn btn-outline-dark btn-rounded me-2">Attendance</a>
         <a href="{% url 'performance' %}" class="btn btn-outline-dark btn-rounded me-2">Performance</a>
         <a href="{% url 'chat' %}" class="btn btn-outline-dark btn-rounded me-2">
@@ -168,6 +170,31 @@
     </div>
     <hr>
     <br>
+
+    <h4 class="mb-3">Cue Escalations</h4>
+    <br>
+    <div class="row g-4 mb-5">
+        {% for notification in recent_notifications %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card booking-card p-3 h-100 text-start">
+                    <div class="mb-2">
+                        <span class="status-pill {% if notification.notification_type == 'admin' %}status-rejected{% elif notification.notification_type == 'backup' %}status-pending{% else %}status-accepted{% endif %}">
+                            {{ notification.get_notification_type_display }}
+                        </span>
+                    </div>
+                    <h6>{{ notification.cue.cue_action }}</h6>
+                    <p class="mb-1"><strong>Event:</strong> {{ notification.cue.event.name }}</p>
+                    <p class="mb-1"><strong>Primary Operator:</strong> {{ notification.cue.operator.username }}</p>
+                    <p class="mb-0"><strong>Message:</strong> {{ notification.alert_message }}</p>
+                </div>
+            </div>
+        {% empty %}
+            <p>No cue notifications yet.</p>
+        {% endfor %}
+    </div>
+    <hr>
+    <br>
+
     <!-- Bookings -->
     <h4 class="mb-3">Customer Booked Events</h4>
     <br>

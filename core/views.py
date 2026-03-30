@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.db.models import Count, Avg, Sum, Case, When, IntegerField
+from django.db.models import Count, Avg, Sum, Case, When, IntegerField, Q
 from django import forms
 from django.contrib import messages
 from decimal import Decimal
@@ -356,6 +356,20 @@ def admin_dashboard(request):
         is_seen=False
     ).count()
 
+    recent_notifications = Notification.objects.filter(
+        Q(recipient=request.user) | Q(cue__event__admin=request.user)
+    ).select_related(
+        "cue",
+        "recipient",
+        "cue__operator",
+        "cue__event",
+    ).distinct().order_by("-created_at")[:5]
+
+    escalation_notification_count = Notification.objects.filter(
+        recipient=request.user,
+        notification_type="admin",
+    ).count()
+
     # =========================
     # Render Dashboard
     # =========================
@@ -368,6 +382,8 @@ def admin_dashboard(request):
         "operators": operators,
         "customers": customers,
         "unread_count": unread_count,  # 🔥 for red dot
+        "recent_notifications": recent_notifications,
+        "escalation_notification_count": escalation_notification_count,
     })
 
 
@@ -412,9 +428,13 @@ def operator_dashboard(request):
         return redirect("login")
 
     cues = Cue.objects.filter(
-        operator=request.user,
+        Q(operator=request.user) |
+        Q(
+            backup_operators=request.user,
+            escalation_triggered_at__isnull=False,
+        ),
         cue_status="Pending"
-    ).select_related("event").order_by("cue_date", "cue_time")
+    ).select_related("event", "operator", "acknowledged_by").distinct().order_by("cue_date", "cue_time")
 
     from .models import ChatMessage
 
@@ -589,7 +609,21 @@ def cue_create(request):
 # =========================
 @login_required
 def notification_list(request):
-    notifications = Notification.objects.all().order_by("-id")
+    if request.user.role == "admin":
+        notifications = Notification.objects.filter(
+            Q(recipient=request.user) | Q(cue__event__admin=request.user)
+        )
+    elif request.user.role == "operator":
+        notifications = Notification.objects.filter(recipient=request.user)
+    else:
+        return redirect("login")
+
+    notifications = notifications.select_related(
+        "cue",
+        "recipient",
+        "cue__event",
+        "cue__operator",
+    ).distinct().order_by("-created_at")
     return render(request, "notification_list.html", {"notifications": notifications})
 
 
@@ -706,13 +740,20 @@ def complete_cue(request, pk):
         return redirect("login")
 
     cue = get_object_or_404(
-        Cue,
+        Cue.objects.filter(
+            Q(operator=request.user) |
+            Q(
+                backup_operators=request.user,
+                escalation_triggered_at__isnull=False,
+            )
+        ).distinct(),
         id=pk,
-        operator=request.user
     )
 
     cue.cue_status = "Completed"
-    cue.save()
+    cue.acknowledged_at = timezone.now()
+    cue.acknowledged_by = request.user
+    cue.save(update_fields=["cue_status", "acknowledged_at", "acknowledged_by"])
 
     return redirect("operator_dashboard")
 

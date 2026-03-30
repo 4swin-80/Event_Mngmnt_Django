@@ -131,6 +131,11 @@ class Cue(models.Model):
         on_delete=models.CASCADE,
         related_name='assigned_cues'
     )
+    backup_operators = models.ManyToManyField(
+        User,
+        blank=True,
+        related_name='backup_cues'
+    )
     cue_date = models.DateField()
     cue_time = models.TimeField()
     cue_action = models.CharField(max_length=100)
@@ -139,6 +144,16 @@ class Cue(models.Model):
     note = models.TextField(blank=True, null=True)
 
     pre_alert_sec = models.IntegerField(default=0)
+    alert_sent_at = models.DateTimeField(blank=True, null=True)
+    acknowledged_at = models.DateTimeField(blank=True, null=True)
+    acknowledged_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='acknowledged_cues'
+    )
+    escalation_triggered_at = models.DateTimeField(blank=True, null=True)
     cue_status = models.CharField(
         max_length=30,
         choices=CUE_STATUS_CHOICES,
@@ -183,6 +198,12 @@ class Attendance(models.Model):
 # Notification Model
 # =========================
 class Notification(models.Model):
+    NOTIFICATION_TYPE_CHOICES = (
+        ('primary', 'Primary Alert'),
+        ('backup', 'Backup Alert'),
+        ('admin', 'Admin Alert'),
+    )
+
     ALERT_STATUS_CHOICES = (
         ('Pending', 'Pending'),
         ('Triggered', 'Triggered'),
@@ -193,6 +214,18 @@ class Notification(models.Model):
         on_delete=models.CASCADE,
         related_name='notifications'
     )
+    recipient = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='notifications'
+    )
+    notification_type = models.CharField(
+        max_length=20,
+        choices=NOTIFICATION_TYPE_CHOICES,
+        default='primary'
+    )
     alert_time = models.TimeField()
     alert_message = models.CharField(max_length=150)
     alert_status = models.CharField(
@@ -200,6 +233,7 @@ class Notification(models.Model):
         choices=ALERT_STATUS_CHOICES,
         default='Pending'
     )
+    created_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"Notification for {self.cue.cue_action}"
