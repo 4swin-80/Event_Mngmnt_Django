@@ -356,18 +356,10 @@ def admin_dashboard(request):
         is_seen=False
     ).count()
 
-    recent_notifications = Notification.objects.filter(
-        Q(recipient=request.user) | Q(cue__event__admin=request.user)
-    ).select_related(
-        "cue",
-        "recipient",
-        "cue__operator",
-        "cue__event",
-    ).distinct().order_by("-created_at")[:5]
-
     escalation_notification_count = Notification.objects.filter(
         recipient=request.user,
         notification_type="admin",
+        is_seen=False,
     ).count()
 
     # =========================
@@ -382,7 +374,6 @@ def admin_dashboard(request):
         "operators": operators,
         "customers": customers,
         "unread_count": unread_count,  # 🔥 for red dot
-        "recent_notifications": recent_notifications,
         "escalation_notification_count": escalation_notification_count,
     })
 
@@ -428,13 +419,9 @@ def operator_dashboard(request):
         return redirect("login")
 
     cues = Cue.objects.filter(
-        Q(operator=request.user) |
-        Q(
-            backup_operators=request.user,
-            escalation_triggered_at__isnull=False,
-        ),
+        operator=request.user,
         cue_status="Pending"
-    ).select_related("event", "operator", "acknowledged_by").distinct().order_by("cue_date", "cue_time")
+    ).select_related("event", "operator", "acknowledged_by").order_by("cue_date", "cue_time")
 
     from .models import ChatMessage
 
@@ -610,6 +597,12 @@ def cue_create(request):
 @login_required
 def notification_list(request):
     if request.user.role == "admin":
+        Notification.objects.filter(
+            recipient=request.user,
+            notification_type="admin",
+            is_seen=False,
+        ).update(is_seen=True)
+
         notifications = Notification.objects.filter(
             Q(recipient=request.user) | Q(cue__event__admin=request.user)
         )
@@ -740,14 +733,9 @@ def complete_cue(request, pk):
         return redirect("login")
 
     cue = get_object_or_404(
-        Cue.objects.filter(
-            Q(operator=request.user) |
-            Q(
-                backup_operators=request.user,
-                escalation_triggered_at__isnull=False,
-            )
-        ).distinct(),
+        Cue,
         id=pk,
+        operator=request.user,
     )
 
     cue.cue_status = "Completed"

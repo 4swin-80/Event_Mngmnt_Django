@@ -234,6 +234,7 @@ class Notification(models.Model):
         default='Pending'
     )
     created_at = models.DateTimeField(default=timezone.now)
+    is_seen = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Notification for {self.cue.cue_action}"
